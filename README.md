@@ -20,3 +20,9 @@ Arguments are the following:
 | imgsize     | Size of region of interest. | 200,200 |
 | outputpath     | Path to put the output directory. | /analysis/output |
 | outputdirname     | Name of output dir. | exp1_array |
+
+If MPI is available, the following command will run the script in 10 processes at the same time. This will vastly increase the speed.
+
+```
+$ mpirun -n 10 python [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
+```
