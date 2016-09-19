@@ -13,7 +13,7 @@ class read:
 			'sg_no': 'Missing input: space group number',
 			'hkl': 'Missing input: Miller indices of diffraction spot [h,k,l]',
 			'wavelength': 'Missing input: wavelength in A',
-			'stem': 'Missing input: path/stem of image input files',
+			'path': 'Missing input: path/stem of NumPy array from getdata.py',
 			'M': 'Missing input: magnification of dfxrm setup',
 		}
 
