@@ -11,7 +11,7 @@ $ python [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [out
 Arguments are the following:
 
 | Argument | Description | Example |
-| ------------- | ----------- |
+| ------------- | ----------- | ----------- |
 | datadir      | Directory of .edf files. | /data/experiment1 |
 | dataname     | Name of data files. | run1_ |
 | bgdir     | Directory of background .edf files. | /data/background1 |
