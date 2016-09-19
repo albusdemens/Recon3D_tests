@@ -34,6 +34,7 @@ import numpy as np
 import EdfFile
 import warnings
 import time
+import sys
 
 from os import listdir
 from os.path import isfile, join
@@ -67,20 +68,19 @@ class GetEdfData(object):
 		filename,
 		bg_path,
 		bg_filename,
-		roi,
-		datatype):
+		roi):
 		super(GetEdfData, self).__init__()
 
 		self.comm = MPI.COMM_WORLD
 		self.rank = self.comm.Get_rank()
 		self.size = self.comm.Get_size()
 
-		self.datatype = datatype
+		# self.datatype = datatype
 		self.sampletitle = filename
 		self.path = path
 		self.bg_path = bg_path
 		self.roi = roi
-		self.ts = test_switch
+		# self.ts = test_switch
 
 		self.getFilelists(filename, bg_filename)
 		#
@@ -193,7 +193,7 @@ class GetEdfData(object):
 		try:
 			srcur = header['machine current'].split(' ')[-2]
 		except KeyError:
-			print "KeyError"
+			# print "KeyError"
 			srcur = 0
 
 		return mot_array, motpos_array, det_array, detpos_array, srcur
@@ -310,14 +310,17 @@ class GetEdfData(object):
 		if self.rank == 0:
 			print "Making meta array."
 
-		for i in range(len(self.fma)):
+		for i in range(len(self.meta)):
 
 			mot_array, motpos_array, det_array, detpos_array, srcur = self.getHeader(i)
 
 			self.meta[i, 0] = round(float(motpos_array[mot_array.index('samrz')]), 8)
 			self.meta[i, 1] = round(float(motpos_array[mot_array.index('samry')]), 8)
 			self.meta[i, 2] = round(float(motpos_array[mot_array.index('diffrx')]), 8)
-			self.meta[i, 2] = srcur
+			if srcur == 0:
+				self.meta[i, 3] = round(float(motpos_array[det_array.index('srcur')]), 8)
+			else:
+				self.meta[i, 3] = srcur
 
 		self.meta = np.around(self.meta, decimals=8)
 
@@ -397,17 +400,17 @@ class GetEdfData(object):
 
 	def getImage(self, index, full):
 		file_with_path = self.path + '/' + self.data_files[index]
-		if self.rank == 0:
-			print file_with_path
+		# if self.rank == 0:
+		# 	print file_with_path
 
 		if True:
 			img = EdfFile.EdfFile(file_with_path)
-			if self.adjustoffset:
-				alpha = self.meta[index, 0]
-				a_index = np.where(self.alphavals == alpha)
-				roi = self.adj_array[a_index[0]][0]
-			else:
-				roi = self.roi
+			# if self.adjustoffset:
+			# 	alpha = self.meta[index, 0]
+			# 	a_index = np.where(self.alphavals == alpha)
+			# 	roi = self.adj_array[a_index[0]][0]
+			# else:
+			roi = self.roi
 
 			if full:
 				im = img.GetData(0).astype(np.int64) - self.bg_combined_full
@@ -487,9 +490,22 @@ class GetEdfData(object):
 		imgarray = np.zeros((len(index), len(img[:, 0]), len(img[0, :])))
 
 		def addToArray(index_part):
+			if self.rank == 0:
+				print "Loading array from data files..."
+			point = len(index_part) / 100
+			incr = len(index_part) / 100
 			imgarray_part = np.zeros((len(index_part), len(img[:, 0]), len(img[0, :])))
 			for i in range(len(index_part)):
-				print "Adding image {} to array. (Rank {})".format(i, self.rank)
+				if self.rank == 0 and i % (5 * point) == 0:
+					sys.stdout.write('\r')
+					# the exact output you're looking for:
+					sys.stdout.write("\r[" + "=" * (i / incr) + " " * ((len(index_part)- i)/ incr) + "]" + str(i / point) + "%")
+					sys.stdout.flush()
+					# sys.stdout.write("[%-20s] %d%%" % ('=' * i, 5 * i))
+					# sys.stdout.flush()
+					# done = 100*(float(i)/(len(index_part)))
+					# print "Calculation is %g perc. complete on core %g." % (done, self.rank)
+				# print "Adding image {} to array. (Rank {})".format(i, self.rank)
 
 				img0 = self.getImage(index_part[i], False)
 				imgsum = np.sum(img0, 1) / len(img0[0, :])
@@ -503,9 +519,11 @@ class GetEdfData(object):
 				imgarray_part[i, :, :] = img0 - gradient
 
 			imgarray_part[0, 0, 0] = self.rank
+			if self.rank == 0:
+				print "\nArray loaded."
 			return imgarray_part
 
-		# Chose part of data set for a specific CPU (rank).
+		# Choose part of data set for a specific CPU (rank).
 		local_n = len(index) / self.size
 		istart = self.rank * local_n
 		istop = (self.rank + 1) * local_n
