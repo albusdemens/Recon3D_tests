@@ -19,7 +19,7 @@ mpi4py (For parallel tasks)
 
 To use the class in another Python file:
 
-	from lib.getedfdata import *
+	from lib.miniged import GetEdfData
 
 where getedfdata.py is in a sub directory called 'lib'.
 
@@ -29,7 +29,6 @@ of this file.
 """
 
 import os
-import math
 import numpy as np
 import EdfFile
 import warnings
