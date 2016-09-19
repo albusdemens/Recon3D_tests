@@ -8,15 +8,15 @@ The script getdata.py reads data from .edf files and outputs a NumPy array with 
 $ python [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
 ```
 
+Arguments are the following:
 
-
-| Argument | Description          |
+| Argument | Description | Example |
 | ------------- | ----------- |
-| datadir      | Display the help window.|
-| dataname     | Closes a window     |
-| bgdir     | Closes a window     |
-| bgname     | Closes a window     |
-| poi     | Closes a window     |
-| imgsize     | Closes a window     |
-| outputpath     | Closes a window     |
-| outputdirname     | Closes a window     |
+| datadir      | Directory of .edf files. | /data/experiment1 |
+| dataname     | Name of data files. | run1_ |
+| bgdir     | Directory of background .edf files. | /data/background1 |
+| bgname     | Name of background files. | bg1_ |
+| poi     | Center point for region of interest. | 512,512 |
+| imgsize     | Size of region of interest. | 200,200 |
+| outputpath     | Path to put the output directory. | /analysis/output |
+| outputdirname     | Name of output dir. | exp1_array |
