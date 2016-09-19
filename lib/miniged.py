@@ -82,21 +82,12 @@ class GetEdfData(object):
 			self.rank = 0
 			self.size = 1
 
-		# self.datatype = datatype
 		self.sampletitle = filename
 		self.path = path
 		self.bg_path = bg_path
 		self.roi = roi
-		# self.ts = test_switch
 
 		self.getFilelists(filename, bg_filename)
-		#
-		# self.dirhash = hashlib.md5(
-		# 	self.path + '/' +
-		# 	filename +
-		# 	str(len(self.data_files))).hexdigest()
-		# print self.dirhash
-		# print self.path + '/' + filename
 
 		self.getBGarray()
 		self.getMetaData()
@@ -170,10 +161,13 @@ class GetEdfData(object):
 		indexlist = []
 
 		for ind in header.keys():
-			if ind != 'motor_pos' and ind != 'motor_mne' and ind != 'counter_pos' and ind != 'counter_mne':
+			if ind != 'motor_pos'\
+				and ind != 'motor_mne'\
+				and ind != 'counter_pos'\
+				and ind != 'counter_mne':
+
 				indexlist.append(ind)
-			# if ind == 'motor_mne':
-			# if ind == 'counter_mne':
+
 		indexlist.extend(header['motor_mne'].split(' '))
 		try:
 			indexlist.extend(header['counter_mne'].split(' '))
@@ -200,7 +194,6 @@ class GetEdfData(object):
 		try:
 			srcur = header['machine current'].split(' ')[-2]
 		except KeyError:
-			# print "KeyError"
 			srcur = 0
 
 		return mot_array, motpos_array, det_array, detpos_array, srcur
@@ -211,12 +204,13 @@ class GetEdfData(object):
 		header = img.GetHeader(0)
 
 		metalist = []
-		# indexlist = []
-		#
-		# a = 0
 
 		for ind in header.keys():
-			if ind != 'motor_pos' and ind != 'motor_mne' and ind != 'counter_pos' and ind != 'counter_mne':
+			if ind != 'motor_pos'\
+				and ind != 'motor_mne'\
+				and ind != 'counter_pos'\
+				and ind != 'counter_mne':
+
 				metalist.append(header[ind])
 
 		metalist.extend(header['motor_pos'].split(' '))
@@ -225,91 +219,7 @@ class GetEdfData(object):
 		except:
 			pass
 
-			# if filenumber == 0:
-			# 	if ind != 'motor_pos' and ind != 'motor_mne' and
-			# 	ind != 'counter_pos' and ind != 'counter_mne':
-			# 		indexlist.append(ind)
-			# 	# if ind == 'motor_mne':
-			# 	# if ind == 'counter_mne':
-			# 	indexlist.extend(header['motor_mne'].split(' '))
-			# 	indexlist.extend(header['counter_mne'].split(' '))
-			#
-			# 	self.indexlist = indexlist
-
-		# print indexlist
-
 		return metalist
-
-	def readMetaFile(self, metadatafile):
-		while True:
-			time.sleep(0.5)
-			try:
-				self.meta = np.loadtxt(metadatafile)
-				if len(self.meta) == len(self.data_files):
-					break
-			except ValueError:
-				pass
-
-	def readFullMetaFile(self, fullmetadatafile, metadatafile, indexfile):
-		self.indexlist = np.load(indexfile).tolist()
-		while True:
-			time.sleep(0.5)
-			try:
-				self.fma = np.load(fullmetadatafile)
-				self.meta = np.load(metadatafile)
-				if len(self.fma) == len(self.data_files):
-					break
-			except ValueError:
-				pass
-
-	def makeFullMetaArray(self):
-		self.meta = np.zeros((len(self.data_files), 4))
-
-		if self.rank == 0:
-			print "Reading meta data..."
-
-		self.fma = []
-		self.getIndexList()
-
-		for i in range(len(self.data_files)):
-			self.fma.append(self.getFullHeader(i))
-
-	# def makeMetaArray(self):
-	# 	self.meta = np.zeros((len(self.data_files), 4))
-	#
-	# 	if self.rank == 0:
-	# 		print "Reading meta data..."
-	#
-	# 	for i in range(len(self.data_files)):
-	# 		try:
-	# 			mot_array, motpos_array, det_array, detpos_array, srcur = self.getHeader(i)
-	# 		except ValueError:
-	# 			mot_array, motpos_array, det_array, detpos_array = self.getHeader(i)
-	# 			self.meta[i, 3] = round(float(detpos_array[det_array.index('srcur')]), 5)
-	#
-	# 		if self.datatype == 'topotomo':
-	# 			self.meta[i, 0] = round(float(motpos_array[mot_array.index('diffrx')]), 8)
-	# 			self.meta[i, 1] = round(float(motpos_array[mot_array.index('diffrz')]), 8)
-	# 			self.meta[i, 2] = float(self.data_files[i][-8:-4])
-	#
-	# 		if self.datatype == 'strain_eta':
-	# 			theta = (11.006 - 10.986) / 40
-	# 			self.meta[i, 0] = round(float(motpos_array[mot_array.index('obpitch')]), 8)
-	# 			self.meta[i, 1] = round(
-	# 				10.986 + theta *
-	# 				(float(self.data_files[i][-8:-4])) +
-	# 				theta / 2, 8)
-	# 			self.meta[i, 2] = float(self.data_files[i][-8:-4])
-	#
-	# 		if self.datatype == 'strain_tt':
-	# 			self.meta[i, 0] = round(float(motpos_array[mot_array.index('obyaw')]), 8)
-	# 			self.meta[i, 1] = round(float(motpos_array[mot_array.index('diffrz')]), 8)
-	# 			self.meta[i, 2] = round(float(motpos_array[mot_array.index('diffrx')]), 8)
-	#
-	# 		if self.datatype == 'mosaicity':
-	# 			self.meta[i, 0] = round(float(motpos_array[mot_array.index('samry')]), 8)
-	# 			self.meta[i, 1] = round(float(motpos_array[mot_array.index('samrz')]), 8)
-	# 			self.meta[i, 2] = round(float(motpos_array[mot_array.index('diffrx')]), 8)
 
 	def makeMetaArrayNew(self):
 		self.meta = np.zeros((len(self.data_files), 4))
@@ -332,24 +242,8 @@ class GetEdfData(object):
 		self.meta = np.around(self.meta, decimals=8)
 
 	def getMetaData(self):
-		# fullmetadatafile = 'tmp/datafullmeta_%s.npy' % self.dirhash
-		# metadatafile = 'tmp/datameta_%s.txt' % self.dirhash
-		# indexfile = 'tmp/dataindex_%s.npy' % self.dirhash
-
 		print "Starting meta data collection."
 		self.makeMetaArrayNew()
-		#
-		# if os.path.isfile(metadatafile):
-		# 	print "Reading meta data from file."
-		# 	self.readMetaFile(metadatafile)
-		#
-		# else:
-		# 	print "Making meta data file."
-		# 	self.makeFullMetaArray()
-		# 	self.makeMetaArrayNew()
-		# 	np.savetxt(metadatafile, self.meta)
-		# 	np.save(indexfile, self.indexlist)
-		# 	np.save(fullmetadatafile, self.fma)
 
 		alphavals = sorted(list(set(self.meta[:, 0])))
 		betavals = sorted(list(set(self.meta[:, 1])))
@@ -407,26 +301,18 @@ class GetEdfData(object):
 
 	def getImage(self, index, full):
 		file_with_path = self.path + '/' + self.data_files[index]
-		# if self.rank == 0:
-		# 	print file_with_path
 
-		if True:
-			img = EdfFile.EdfFile(file_with_path)
-			# if self.adjustoffset:
-			# 	alpha = self.meta[index, 0]
-			# 	a_index = np.where(self.alphavals == alpha)
-			# 	roi = self.adj_array[a_index[0]][0]
-			# else:
-			roi = self.roi
+		img = EdfFile.EdfFile(file_with_path)
+		roi = self.roi
 
-			if full:
-				im = img.GetData(0).astype(np.int64) - self.bg_combined_full
-			else:
-				im = img.GetData(0).astype(np.int64)[
-					roi[2]:roi[3],
-					roi[0]:roi[1]] - self.bg_combined
+		if full:
+			im = img.GetData(0).astype(np.int64) - self.bg_combined_full
+		else:
+			im = img.GetData(0).astype(np.int64)[
+				roi[2]:roi[3],
+				roi[0]:roi[1]] - self.bg_combined
 
-			im = self.cleanImage(im)
+		im = self.cleanImage(im)
 
 		return im
 
@@ -460,7 +346,7 @@ class GetEdfData(object):
 			imgr = scipy.ndimage.interpolation.rotate(img, rot)
 			mskr = scipy.ndimage.interpolation.rotate(mask, rot)
 
-			for j, xvals in enumerate(mskr[:, 0]):  # range(len(mskr[:, 0])):
+			for j, xvals in enumerate(mskr[:, 0]):
 				ids = np.nonzero(mskr[j, :])
 				if ids[0].any():
 					imgr[j, ids[0]] = smooth(imgr[j, ids[0]], slen)
@@ -505,19 +391,16 @@ class GetEdfData(object):
 			for i in range(len(index_part)):
 				if self.rank == 0 and i % (5 * point) == 0:
 					sys.stdout.write('\r')
-					# the exact output you're looking for:
-					sys.stdout.write("\r[" + "=" * (i / incr) + " " * ((len(index_part)- i)/ incr) + "]" + str(i / point) + "%")
+					sys.stdout.write(
+						"\r[" + "=" * (i / incr) +
+						" " * ((len(index_part) - i) / incr) +
+						"]" + str(i / point) + "%")
 					sys.stdout.flush()
-					# sys.stdout.write("[%-20s] %d%%" % ('=' * i, 5 * i))
-					# sys.stdout.flush()
-					# done = 100*(float(i)/(len(index_part)))
-					# print "Calculation is %g perc. complete on core %g." % (done, self.rank)
-				# print "Adding image {} to array. (Rank {})".format(i, self.rank)
 
 				img0 = self.getImage(index_part[i], False)
 				imgsum = np.sum(img0, 1) / len(img0[0, :])
 
-				# return imgarray_part[i, :, :], imgsum
+				# Adjusting for gradient in image.
 				ran = np.array(range(len(imgsum)))
 				popt, pcov = self.fitLine(ran, imgsum)
 				fittedline = ran * popt[0] + popt[1]
@@ -536,14 +419,13 @@ class GetEdfData(object):
 		istop = (self.rank + 1) * local_n
 		index_part = index[istart:istop]
 
-		# Calculate strain on part of data set.
+		# Load images from part of index list.
 		imgarray_part = addToArray(index_part)
 
 		# CPU 0 (rank 0) combines data parts from other CPUs.
 		if self.rank == 0:
 			# Make empty arrays to fill in data from other cores.
 			recv_buffer = np.zeros((np.shape(imgarray_part)))
-			# strainpic = np.zeros((np.shape(img)))
 
 			datarank = imgarray_part[0, 0, 0]
 			imgarray_part[0, 0, 0] = 0
