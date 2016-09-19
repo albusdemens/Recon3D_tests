@@ -7,7 +7,7 @@
 The script getdata.py reads data from .edf files and outputs a NumPy array with the dimensions tilt1-steps x tilt2-steps x omega-steps x img-xlen x img-ylen, where tilt1 and tilt2 are the two top tilts in the LAB goniometer at ID06. Omega is the topo-tomo rotation stage. The command to create the array is the following:
 
 ```
-$ python [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
+$ python getdata.py [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
 ```
 
 Arguments are the following:
@@ -26,5 +26,5 @@ Arguments are the following:
 If MPI is available, the following command will run the script in 10 processes at the same time. This will vastly increase the speed.
 
 ```
-$ mpirun -n 10 python [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
+$ mpirun -n 10 python getdata.py [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
 ```
