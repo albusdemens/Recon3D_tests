@@ -93,7 +93,7 @@ class makematrix():
 			np.save(self.directory + '/beta.npy', self.beta)
 			np.save(self.directory + '/omega.npy', self.omega)
 
-			np.save(self.directory + '/dataarray_{}x{}.npy'.format(imsiz[0], imsiz[1]), bigarray)
+			np.save(self.directory + '/dataarray.npy', bigarray)
 
 
 if __name__ == "__main__":
