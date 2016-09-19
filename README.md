@@ -8,4 +8,13 @@ The script getdata.py reads data from .edf files and outputs a NumPy array with 
 $ python [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
 '''
 
-
+| Argument | Description          |
+| ------------- | ----------- |
+| datadir      | Display the help window.|
+| dataname     | Closes a window     |
+| bgdir     | Closes a window     |
+| bgname     | Closes a window     |
+| poi     | Closes a window     |
+| imgsize     | Closes a window     |
+| outputpath     | Closes a window     |
+| outputdirname     | Closes a window     |
