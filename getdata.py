@@ -5,8 +5,10 @@ import os
 import warnings
 import numpy as np
 
-
-# from mpi4py import MPI
+try:
+	from mpi4py import MPI
+except ImportError:
+	print "No MPI, running on 1 core."
 
 '''
 Inputs:
@@ -32,7 +34,6 @@ class makematrix():
 			self.rank = self.comm.Get_rank()
 			self.size = self.comm.Get_size()
 		except NameError:
-			print "No MPI, running on 1 core."
 			self.rank = 0
 			self.size = 1
 
