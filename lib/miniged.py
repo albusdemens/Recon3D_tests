@@ -1,8 +1,6 @@
 # !/bin/python
 """Class for loading DFXM data sets.
 
-
-
 The class can be loaded from another Python file. This gives access to all
 metadata in the data set as well as direct access to an image by giving either
 coordinates or an index.
@@ -12,8 +10,6 @@ A number of packages are required:
 numpy
 scipy
 EdfFile
-matplotlib
-seaborn (For prettier plots)
 mpi4py (For parallel tasks)
 
 
