@@ -4,7 +4,9 @@ import time
 import os
 import warnings
 import numpy as np
-from mpi4py import MPI
+
+
+# from mpi4py import MPI
 
 '''
 Inputs:
@@ -25,9 +27,14 @@ class makematrix():
 		dataname, bgpath, bgfilename,
 		poi, imgsize, outputpath, outputdir):
 
-		self.comm = MPI.COMM_WORLD
-		self.rank = self.comm.Get_rank()
-		self.size = self.comm.Get_size()
+		try:
+			self.comm = MPI.COMM_WORLD
+			self.rank = self.comm.Get_rank()
+			self.size = self.comm.Get_size()
+		except NameError:
+			print "No MPI, running on 1 core."
+			self.rank = 0
+			self.size = 1
 
 		imgsize = imgsize.split(',')
 		poi = poi.split(',')

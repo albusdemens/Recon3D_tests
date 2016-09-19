@@ -41,7 +41,10 @@ from os.path import isfile, join
 
 from time import localtime, strftime
 
-from mpi4py import MPI
+try:
+	from mpi4py import MPI
+except ImportError:
+	pass
 
 
 class GetEdfData(object):
@@ -71,9 +74,13 @@ class GetEdfData(object):
 		roi):
 		super(GetEdfData, self).__init__()
 
-		self.comm = MPI.COMM_WORLD
-		self.rank = self.comm.Get_rank()
-		self.size = self.comm.Get_size()
+		try:
+			self.comm = MPI.COMM_WORLD
+			self.rank = self.comm.Get_rank()
+			self.size = self.comm.Get_size()
+		except NameError:
+			self.rank = 0
+			self.size = 1
 
 		# self.datatype = datatype
 		self.sampletitle = filename
