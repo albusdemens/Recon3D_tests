@@ -13,7 +13,6 @@ except ImportError:
 class main():
 	def __init__(self, inifile):
 		self.par = self.getparameters(inifile)
-		print self.par['M']
 
 		try:
 			self.comm = MPI.COMM_WORLD
@@ -29,8 +28,9 @@ class main():
 		self.readarrays()
 		grain_ang = self.reconstruct_mpi()
 
-		print np.shape(self.fullarray)
-		print self.alpha
+		if self.rank == 0:
+			stop = time.time()
+			print "Time spent: {0:8.4f} seconds.".format(stop - start)
 
 	def getparameters(self, inifile):
 		checkinput = ini(inifile)
@@ -46,11 +46,12 @@ class main():
 	def reconstruct_mpi(self):
 		ypix = np.array(self.par['grain_steps'])[2]
 
-		# Chose part of data set for a specific CPU (rank).
+		# Chose part of data set for a specific core (rank).
 		local_n = ypix / self.size
 		istart = self.rank * local_n
 		istop = (self.rank + 1) * local_n
 
+		# Run part of the data set on the current core.
 		local_grain_ang = self.reconstruct_part(ista=istart, isto=istop)
 
 		if self.rank == 0:
@@ -58,31 +59,33 @@ class main():
 			recv_buffer = np.zeros(np.shape(local_grain_ang), dtype='float64')
 			grain_ang = np.zeros(np.shape(local_grain_ang), dtype='float64')
 			datarank = local_grain_ang[0, 0, 0, 0]
+
+			# Make the datarank spot into an average of nearby spots.
 			local_grain_ang[0, 0, 0, 0] = np.mean(
 				local_grain_ang[1:5, 1:5, istart:istop, 0])
-			# print local_grain_ang[1:5, 1:5, istart:istop, 0]
+
+			# Insert the calculated part from core 0 into the full array.
 			grain_ang[:, :, istart:istop, :] = local_grain_ang[:, :, istart:istop, :]
 			for i in range(1, self.size):
 				try:
-					comm.Recv(recv_buffer, MPI.ANY_SOURCE)
+					# Receive calculated array from other cores and get the datarank.
+					self.comm.Recv(recv_buffer, MPI.ANY_SOURCE)
 					datarank = int(recv_buffer[0, 0, 0, 0])
 					rstart = datarank * local_n
 					rstop = (datarank + 1) * local_n
 					recv_buffer[0, 0, 0, 0] = np.mean(recv_buffer[1:5, 1:5, rstart:rstop, 0])
+					# Add array from other cores to main array.
 					grain_ang[:, :, rstart:rstop, :] =\
 						recv_buffer[:, :, rstart:rstop, :]
 				except Exception:
 					print "MPI error."
 
-		else:
-			# all other process send their result
-			comm.Send(local_grain_ang, dest=0)
-
-		# root process prints results
-		if self.rank == 0:
+			# Core 0 returns the full array.
 			return grain_ang
 
-		# np.save('/u/data/andcj/tmp/grain_ang.npy', grain_ang)
+		else:
+			# all other process send their result to core 0.
+			self.comm.Send(local_grain_ang, dest=0)
 
 	def reconstruct_part(self, ista, isto):
 		"""
@@ -92,9 +95,6 @@ class main():
 		NB AS OF PRESENT THETA IS A NUMBER, NOT AN ARRAY. TO ALLOW FOR AN ARRAY
 		NEED TO THINK ABOUT THE LOOPING AND THE DIMENSIONS OF prop.
 		"""
-		if self.rank == 0:
-			t0 = time.clock()
-
 		slow = self.alpha
 		med = self.beta
 		fast = self.omega
@@ -124,19 +124,15 @@ class main():
 		t_x = "None"
 		if self.rank == 0:
 			print "Making forward projection..."
-		# T_s2d = forward_projection.build_rotation_lookup
-		# (slow,med,fast,np.array([theta]),M,t_x,t_y,t_z,mode)
-		# T_s2d = forward_projection.build_rotation_lookup
-		# (np.array([0]), n.array([0]), fast, slow, M, t_x, t_y, t_z, mode)
+
 		T_s2d = self.build_rotation_lookup()
 		if self.rank == 0:
 			print "Forward projection done."
 
-		for iz in range(ista, isto):  # range(grain_steps[2]):
-
-			# if self.rank == 0:
-			done = 100 * (float(iz - ista) / (isto - ista))
-			print "Calculation is %g perc. complete on core %g." % (done, self.rank)
+		for iz in range(ista, isto):
+			if self.rank == 0:
+				done = 100 * (float(iz - ista) / (isto - ista))
+				print "Calculation is %g perc. complete on core %g." % (done, self.rank)
 
 			for ix in range(grain_steps[0]):
 				timelist = []
@@ -146,10 +142,8 @@ class main():
 					if self.rank == 0:
 						t_0 = time.clock()
 
-					grain_xyz[ix, iy, iz] =\
-						grain_pos + grain_dimstep *\
-						(np.array([ix, iy, iz]) - 0.5 *
-							(np.array(grain_steps) - 1))
+					grain_xyz[ix, iy, iz] = grain_pos + grain_dimstep *\
+						(np.array([ix, iy, iz]) - 0.5 * (np.array(grain_steps) - 1))
 
 					xyz_d_f = np.matmul(T_s2d[0, :, 0, 0], grain_xyz[ix, iy, iz])
 					detx_f = np.rint(xyz_d_f[:, 0] + detx_center).astype(int)
@@ -175,17 +169,11 @@ class main():
 			if self.rank == 0:
 				print "Avg. voxel time: {0:8.4f} seconds.".format(
 					sum(timelist) / len(timelist))
-				# print "Avg. data retrieval time: {0:8.4f} seconds.".format(
-				# 	sum(timedata)/len(timedata))
-		if self.rank == 0:
-			t1 = time.clock()
-			print "time spent", t1 - t0
+
 		grain_ang[0, 0, 0, 0] = self.rank
 		return grain_ang  # grain_xyz,grain_ang,grain_prop
 
 	def build_rotation_lookup(self):
-		# def build_rotation_lookup(phi_up,phi_lo,omega,\
-		# theta,M,t_x="None",t_y="None",t_z="None",mode="horizontal"):
 		"""
 		Set up the rotation_lookup[theta,omega,phi_lo,phi_up] lookup table
 		of rotation matrices for each value in the theta, omega, phi_lo and
@@ -194,11 +182,6 @@ class main():
 		NB! NEED TO THINK ABOUT THE IMPLICATIONS OF
 		theta BEING MORE THAN A SINGLE VALUE!!!
 		"""
-
-		# up = np.pi * phi_up / 180.
-		# lo = np.pi * phi_lo / 180.
-		# om = np.pi * omega / 180.
-		# th = np.pi * theta / 180.
 
 		up = np.pi * self.alpha / 180.
 		lo = np.pi * self.beta / 180.
