@@ -55,10 +55,10 @@ class main():
 
 		if rank == 0:
 			# Make empty arrays to fill in data from other cores.
-			recv_buffer = n.zeros(n.shape(local_grain_ang), dtype='float64')
-			grain_ang = n.zeros(n.shape(local_grain_ang), dtype='float64')
+			recv_buffer = np.zeros(np.shape(local_grain_ang), dtype='float64')
+			grain_ang = np.zeros(np.shape(local_grain_ang), dtype='float64')
 			datarank = local_grain_ang[0, 0, 0, 0]
-			local_grain_ang[0, 0, 0, 0] = n.mean(
+			local_grain_ang[0, 0, 0, 0] = np.mean(
 				local_grain_ang[1:5, 1:5, istart:istop, 0])
 			# print local_grain_ang[1:5, 1:5, istart:istop, 0]
 			grain_ang[:, :, istart:istop, :] = local_grain_ang[:, :, istart:istop, :]
@@ -68,7 +68,7 @@ class main():
 					datarank = int(recv_buffer[0, 0, 0, 0])
 					rstart = datarank * local_n
 					rstop = (datarank + 1) * local_n
-					recv_buffer[0, 0, 0, 0] = n.mean(recv_buffer[1:5, 1:5, rstart:rstop, 0])
+					recv_buffer[0, 0, 0, 0] = np.mean(recv_buffer[1:5, 1:5, rstart:rstop, 0])
 					grain_ang[:, :, rstart:rstop, :] =\
 						recv_buffer[:, :, rstart:rstop, :]
 				except Exception:
@@ -82,7 +82,7 @@ class main():
 		if self.rank == 0:
 			return grain_ang
 
-		# n.save('/u/data/andcj/tmp/grain_ang.npy', grain_ang)
+		# np.save('/u/data/andcj/tmp/grain_ang.npy', grain_ang)
 
 	def reconstruct_part(self):
 		"""
@@ -95,13 +95,13 @@ class main():
 	if self.rank == 0:
 		t0 = time.clock()
 
-	grain_xyz = n.zeros(grain_steps + [3])
-	grain_ang = n.zeros(grain_steps + [2])
-	grain_dimstep = n.array(grain_dim) / n.array(grain_steps)
-	# grain_prop = n.zeros(grain_steps)
+	grain_xyz = np.zeros(grain_steps + [3])
+	grain_ang = np.zeros(grain_steps + [2])
+	grain_dimstep = np.array(grain_dim) / np.array(grain_steps)
+	# grain_prop = np.zeros(grain_steps)
 
-	detx_size = n.shape(data)[3]
-	detz_size = n.shape(data)[4]
+	detx_size = np.shape(data)[3]
+	detz_size = np.shape(data)[4]
 	detx_center = (detx_size - 0.) / 2  # should probably be -1 in stead of -0...
 	detz_center = (detz_size - 0.) / 2.  # also here... but simulations used 0
 	lens = len(slow)
@@ -111,16 +111,16 @@ class main():
 	mis = min(slow)
 	mam = max(med)
 	mim = min(med)
-	cosinecurve = n.ones((lenf)) * 11.81
-	cosineampl = n.ones((lenf))
-	prop = n.zeros((lens, lenm, lenf))
+	cosinecurve = np.ones((lenf)) * 11.81
+	cosineampl = np.ones((lenf))
+	prop = np.zeros((lens, lenm, lenf))
 	cospopt = [1., 1., 1.]
 
 	t_x = "None"
 	if self.rank == 0:
 		print "Making forward projection..."
-	# T_s2d = forward_projection.build_rotation_lookup(slow,med,fast,n.array([theta]),M,t_x,t_y,t_z,mode)
-	T_s2d = forward_projection.build_rotation_lookup(n.array([0]), n.array([0]), fast, slow, M, t_x, t_y, t_z, mode)
+	# T_s2d = forward_projection.build_rotation_lookup(slow,med,fast,np.array([theta]),M,t_x,t_y,t_z,mode)
+	T_s2d = forward_projection.build_rotation_lookup(np.array([0]), n.array([0]), fast, slow, M, t_x, t_y, t_z, mode)
 	if self.rank == 0:
 		print "Forward projection done."
 
@@ -161,16 +161,105 @@ class main():
 					t_8 = time.clock()
 					timelist.append(t_8 - t_0)
 		if self.rank == 0:
-			print "Avg. voxel time: {0:8.4f} seconds.".format(sum(timelist) / len(timelist))
-			# print "Avg. data retrieval time: {0:8.4f} seconds.".format(sum(timedata)/len(timedata))
+			print "Avg. voxel time: {0:8.4f} seconds.".format(
+				sum(timelist) / len(timelist))
+			# print "Avg. data retrieval time: {0:8.4f} seconds.".format(
+			# 	sum(timedata)/len(timedata))
 	if self.rank == 0:
 		t1 = time.clock()
 		print "time spent", t1 - t0
-	grain_ang[0, 0, 0, 0] = rank
+	grain_ang[0, 0, 0, 0] = self.rank
 	return grain_ang  # grain_xyz,grain_ang,grain_prop
 
 	def build_rotation_lookup(self):
-		pass
+		# def build_rotation_lookup(phi_up,phi_lo,omega,theta,M,t_x="None",t_y="None",t_z="None",mode="horizontal"):
+		"""
+		Set up the rotation_lookup[theta,omega,phi_lo,phi_up] lookup table
+		of rotation matrices for each value in the theta, omega, phi_lo and
+		phi_up arrays.
+
+		NB! NEED TO THINK ABOUT THE IMPLICATIONS OF
+		theta BEING MORE THAN A SINGLE VALUE!!!
+		"""
+
+		up = np.pi * phi_up / 180.
+		lo = np.pi * phi_lo / 180.
+		om = np.pi * omega / 180.
+		th = np.pi * theta / 180.
+		try:
+			t_xx = np.pi * t_x / 180.
+			t_yy = np.pi * t_y / 180.
+			t_zz = np.pi * t_z / 180.
+		except:
+			print "No detector tilt"
+			t_x = "None"
+			t_z = "None"
+
+		th_mat, om_mat, lo_mat, up_mat = np.meshgrid(th, om, lo, up, indexing='ij')
+
+		T_up = np.zeros((len(th), len(om), len(lo), len(up), 3, 3))
+		T_lo = np.zeros((len(th), len(om), len(lo), len(up), 3, 3))
+		Omega = np.zeros((len(th), len(om), len(lo), len(up), 3, 3))
+		Theta = np.zeros((len(th), len(om), len(lo), len(up), 3, 3))
+		T_det = np.zeros((len(th), len(om), len(lo), len(up), 3, 3))
+
+		# For now the detector tilt is the unit matrix, i.e. an ideal detector
+		# positioned perpendicular to the diffracted beam (t_x=t=y=t_z=None).
+		# This can be changed by supplying tilts t_x (vertical) or t_z (horizontal).
+		T_det[:, :, :, :, 0, 0] = -1.
+		# T_det[:,:,:,:,1,1] = 1. #leaving T_det[:,:,:,:,1,1]=0 gives the
+		# projection onto the detector plane
+		T_det[:, :, :, :, 2, 2] = -1.
+
+		if mode == "horizontal":
+			Theta[:, :, :, :, 0, 0] = np.cos(th_mat)
+			Theta[:, :, :, :, 0, 1] = -np.sin(th_mat)
+			Theta[:, :, :, :, 1, 0] = np.sin(th_mat)
+			Theta[:, :, :, :, 1, 1] = np.cos(th_mat)
+			Theta[:, :, :, :, 2, 2] = 1.
+			Omega[:, :, :, :, 0, 0] = 1.
+			Omega[:, :, :, :, 1, 1] = np.cos(om_mat)
+			Omega[:, :, :, :, 1, 2] = -np.sin(om_mat)
+			Omega[:, :, :, :, 2, 1] = np.sin(om_mat)
+			Omega[:, :, :, :, 2, 2] = np.cos(om_mat)
+			T_lo[:, :, :, :, 0, 0] = np.cos(lo_mat)
+			T_lo[:, :, :, :, 0, 2] = np.sin(lo_mat)
+			T_lo[:, :, :, :, 1, 1] = 1.
+			T_lo[:, :, :, :, 2, 0] = -np.sin(lo_mat)
+			T_lo[:, :, :, :, 2, 2] = np.cos(lo_mat)
+			T_up[:, :, :, :, 0, 0] = np.cos(up_mat)
+			T_up[:, :, :, :, 0, 1] = -np.sin(up_mat)
+			T_up[:, :, :, :, 1, 0] = np.sin(up_mat)
+			T_up[:, :, :, :, 1, 1] = np.cos(up_mat)
+			T_up[:, :, :, :, 2, 2] = 1.
+			if t_z != "None":
+				T_det[:, :, :, :, 0, 0] = -1. / np.cos(t_zz - 2 * np.mean(th))
+		elif mode == "vertical":
+			Theta[:, :, :, :, 0, 0] = 1.
+			Theta[:, :, :, :, 1, 1] = np.cos(th_mat)
+			Theta[:, :, :, :, 1, 2] = -np.sin(th_mat)
+			Theta[:, :, :, :, 2, 1] = np.sin(th_mat)
+			Theta[:, :, :, :, 2, 2] = np.cos(th_mat)
+			Omega[:, :, :, :, 0, 0] = np.cos(om_mat)
+			Omega[:, :, :, :, 0, 1] = -np.sin(om_mat)
+			Omega[:, :, :, :, 1, 0] = np.sin(om_mat)
+			Omega[:, :, :, :, 1, 1] = np.cos(om_mat)
+			Omega[:, :, :, :, 2, 2] = 1.
+			# NB Should define around which axes the upper and lower rotation belong
+			T_lo[:, :, :, :, 0, 0] = 1.
+			T_lo[:, :, :, :, 1, 1] = 1.
+			T_lo[:, :, :, :, 2, 2] = 1.
+			T_up[:, :, :, :, 0, 0] = 1.
+			T_up[:, :, :, :, 1, 1] = 1.
+			T_up[:, :, :, :, 2, 2] = 1.
+			if t_x != "None":
+				T_det[:, :, :, :, 2, 2] = -1. / np.cos(t_xx - 2 * np.mean(th))
+		else:
+			print "ERROR: scattering geometry not defined"
+
+		T_s2d = M * np.matmul(
+			T_det, np.matmul(Theta, np.matmul(Omega, np.matmul(T_lo, T_up))))
+		return T_s2d
 
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
