@@ -86,12 +86,14 @@ class makematrix():
 				a = np.where(self.alpha == met[ind, 0])
 				b = np.where(self.beta == met[ind, 1])
 				c = np.where(self.omega == met[ind, 2])
+				# d = np.where(self.theta == met[ind, 4])
 
 				bigarray[a, b, c, :, :] = imgarray[ind, :, :]
 
 			np.save(self.directory + '/alpha.npy', self.alpha)
 			np.save(self.directory + '/beta.npy', self.beta)
-			np.save(self.directory + '/omega.npy', self.omega)
+			np.save(self.directory + '/theta.npy', self.theta)
+			# np.save(self.directory + '/omega.npy', self.omega)
 
 			np.save(self.directory + '/dataarray.npy', bigarray)
 
