@@ -28,3 +28,9 @@ If MPI is available, the following command will run the script in 10 processes a
 ```
 $ mpirun -n 10 python getdata.py [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
 ```
+
+## Running the reconstruction algorithm on a data set.
+
+```
+$ mpirun -n 10 python recon3d.py [initfile]
+```
