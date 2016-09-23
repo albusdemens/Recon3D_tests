@@ -14,13 +14,7 @@ class main():
 	def __init__(self, inifile):
 		self.par = self.getparameters(inifile)
 
-		try:
-			self.comm = MPI.COMM_WORLD
-			self.rank = self.comm.Get_rank()
-			self.size = self.comm.Get_size()
-		except NameError:
-			self.rank = 0
-			self.size = 1
+		self.setup_mpi()
 
 		if self.rank == 0:
 			start = time.time()
@@ -31,6 +25,15 @@ class main():
 		if self.rank == 0:
 			stop = time.time()
 			print "Time spent: {0:8.4f} seconds.".format(stop - start)
+
+	def setup_mpi(self):
+		try:
+			self.comm = MPI.COMM_WORLD
+			self.rank = self.comm.Get_rank()
+			self.size = self.comm.Get_size()
+		except NameError:
+			self.rank = 0
+			self.size = 1
 
 	def getparameters(self, inifile):
 		checkinput = ini(inifile)
