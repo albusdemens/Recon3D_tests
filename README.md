@@ -2,11 +2,11 @@
 
 *** Experimental - still a work in progress ***
 
-Recon3D is a program to get a 3D reconstruction from topo-tomo data sets from ID06 at ESRF. The program takes data where a sample is rotated around the diffrx and at every point, a mosaicity scan is done. This is done through a forward projection algorithm to calculate a given voxel's reflected spot position on the detector.
+Recon3D is a program to get a 3D reconstruction from topo-tomo data sets from ID06 at ESRF. The program takes data where a sample is rotated around the *diffrx* and at every point, a mosaicity scan is done. This is done through a forward projection algorithm to calculate a given voxel's reflected spot position on the detector.
 
 ## Reading data from .edf files to a NumPy array.
 
-The script getdata.py reads data from .edf files and outputs a NumPy array with the dimensions tilt1-steps x tilt2-steps x omega-steps x img-xlen x img-ylen, where tilt1 and tilt2 are the two top tilts in the LAB goniometer at ID06. Omega is the topo-tomo rotation stage. The command to create the array is the following:
+The script getdata.py reads data from .edf files and outputs a NumPy array with the dimensions *tilt1*-steps x *tilt2*-steps x *omega*-steps x *img_xlen* x *img_ylen*, where *tilt1* and *tilt2* are the two top tilts in the LAB goniometer at ID06. *Omega* is the topo-tomo rotation stage. The command to create the array is the following:
 
 ```
 $ python getdata.py [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
