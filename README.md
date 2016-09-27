@@ -2,6 +2,8 @@
 
 *** Experimental - still a work in progress ***
 
+White paper that explains the principle can be found [here](https://github.com/acjak/Recon3D/raw/master/dfxm.pdf).
+
 Recon3D is a program to get a 3D reconstruction from topo-tomo data sets from ID06 at ESRF. The program takes data where a sample is rotated around the *diffrx* and at every point, a mosaicity scan is done. This is done through a forward projection algorithm to calculate a given voxel's reflected spot position on the detector.
 
 Future versions will be able to do reconstruction based on strain datasets.
