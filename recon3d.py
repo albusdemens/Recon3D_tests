@@ -128,7 +128,7 @@ class main():
 		if self.rank == 0:
 			print "Making forward projection..."
 
-		T_s2d = self.build_rotation_lookup()
+		T_s2d = self.build_rotation_lookup_general()
 		if self.rank == 0:
 			print "Forward projection done."
 
@@ -265,6 +265,169 @@ class main():
 
 		T_s2d = float(self.par['M']) * np.matmul(
 			T_det, np.matmul(Theta, np.matmul(Omega, np.matmul(T_lo, T_up))))
+		return T_s2d
+
+	def build_rotation_lookup_general(self, xyz_up=[0, 0, 0], xyz_lo=[0, 0, 0], xyz_th=[0, 0, 0]):
+		"""
+		Set up the rotation_lookup[theta,omega,phi_lo,phi_up] lookup table of
+		rotation matrices for each value in the theta, omega, phi_lo
+		and phi_up arrays.
+
+		This general version incorporates the possibility that the focus points of
+		phi_up, phi_lo and/or theta do not coincide with the intersection of the
+		direct beam and the rotation axis, which is the commonly defined center.
+
+		Takes (x_s,y_s,z_s,1) and converts to (x_r,0,z_r,1) by a 4x4 matrix
+		taking rotations and translations of beam centers into account.
+
+		xyz_up, xyz_lo, xyz_th should be the coordinates (in microns) of the focus point
+		on the rotation axis, eg yxz_up=[-40,0,0] in horizontal geometry.
+		"""
+
+		up = np.pi * self.alpha / 180.
+		lo = np.pi * self.beta / 180.
+		om = np.pi * self.omega / 180.
+		# th = np.pi * self.par['theta'] / 180.
+		th = np.pi * np.array([0]) / 180.
+
+		try:
+			t_xx = np.pi * self.par['t_x'] / 180.
+			t_yy = np.pi * self.par['t_y'] / 180.
+			t_zz = np.pi * self.par['t_z'] / 180.
+		except:
+			print "No detector tilt"
+			self.par['t_x'] = "None"
+			self.par['t_z'] = "None"
+
+		th_mat, om_mat, lo_mat, up_mat = np.meshgrid(th, om, lo, up, indexing='ij')
+
+		R_up = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		R_lo = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		Omega = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		Theta = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		T_det = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		T_up = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		T_lo = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		T_th = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		Tinv_up = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		Tinv_lo = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		Tinv_th = n.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+
+		# The default detector tilt is the unit matrix, i.e. an ideal detector
+		# positioned perpendicular to the diffracted beam (t_x=t=y=t_z=None).
+		# This can be changed by supplying tilts t_x (vertical) or t_z (horizontal).
+		T_det[:, :, :, :, 0, 0] = -1.
+		# T_det[:, :, :, :, 1, 1] = 1. #leaving T_det[:, :, :, :, 1, 1]=0 gives the projection onto the detector plane
+		T_det[:, :, :, :, 2, 2] = -1.
+		T_det[:, :, :, :, 3, 3] = 1.
+
+		# 4x4 according to http://inside.mines.edu/fs_home/gmurray/ArbitraryAxisRotation/
+		T_up[:, :, :, :, 0:3, 3] = -n.array(xyz_up)
+		T_up[:, :, :, :, 0, 0] = 1.
+		T_up[:, :, :, :, 1, 1] = 1.
+		T_up[:, :, :, :, 2, 2] = 1.
+		T_up[:, :, :, :, 3, 3] = 1.
+		Tinv_up[:, :, :, :, 0:3, 3] = n.array(xyz_up)
+		Tinv_up[:, :, :, :, 0, 0] = 1.
+		Tinv_up[:, :, :, :, 1, 1] = 1.
+		Tinv_up[:, :, :, :, 2, 2] = 1.
+		Tinv_up[:, :, :, :, 3, 3] = 1.
+		T_lo[:, :, :, :, 0:3, 3] = -n.array(xyz_lo)
+		T_lo[:, :, :, :, 0, 0] = 1.
+		T_lo[:, :, :, :, 1, 1] = 1.
+		T_lo[:, :, :, :, 2, 2] = 1.
+		T_lo[:, :, :, :, 3, 3] = 1.
+		Tinv_lo[:, :, :, :, 0:3, 3] = n.array(xyz_lo)
+		Tinv_lo[:, :, :, :, 0, 0] = 1.
+		Tinv_lo[:, :, :, :, 1, 1] = 1.
+		Tinv_lo[:, :, :, :, 2, 2] = 1.
+		Tinv_lo[:, :, :, :, 3, 3] = 1.
+		T_th[:, :, :, :, 0:3, 3] = -n.array(xyz_th)
+		T_th[:, :, :, :, 0, 0] = 1.
+		T_th[:, :, :, :, 1, 1] = 1.
+		T_th[:, :, :, :, 2, 2] = 1.
+		T_th[:, :, :, :, 3, 3] = 1.
+		Tinv_th[:, :, :, :, 0:3, 3] = n.array(xyz_th)
+		Tinv_th[:, :, :, :, 0, 0] = 1.
+		Tinv_th[:, :, :, :, 1, 1] = 1.
+		Tinv_th[:, :, :, :, 2, 2] = 1.
+		Tinv_th[:, :, :, :, 3, 3] = 1.
+
+		if mode == "horizontal":
+			Theta[:, :, :, :, 0, 0] = n.cos(th_mat)
+			Theta[:, :, :, :, 0, 1] = -n.sin(th_mat)
+			Theta[:, :, :, :, 1, 0] = n.sin(th_mat)
+			Theta[:, :, :, :, 1, 1] = n.cos(th_mat)
+			Theta[:, :, :, :, 2, 2] = 1.
+			Theta[:, :, :, :, 3, 3] = 1.
+			Omega[:, :, :, :, 0, 0] = 1.
+			Omega[:, :, :, :, 1, 1] = n.cos(om_mat)
+			Omega[:, :, :, :, 1, 2] = -n.sin(om_mat)
+			Omega[:, :, :, :, 2, 1] = n.sin(om_mat)
+			Omega[:, :, :, :, 2, 2] = n.cos(om_mat)
+			Omega[:, :, :, :, 3, 3] = 1.
+			R_lo[:, :, :, :, 0, 0] = n.cos(lo_mat)
+			R_lo[:, :, :, :, 0, 2] = n.sin(lo_mat)
+			R_lo[:, :, :, :, 1, 1] = 1.
+			R_lo[:, :, :, :, 2, 0] = -n.sin(lo_mat)
+			R_lo[:, :, :, :, 2, 2] = n.cos(lo_mat)
+			R_lo[:, :, :, :, 3, 3] = 1.
+			R_up[:, :, :, :, 0, 0] = n.cos(up_mat)
+			R_up[:, :, :, :, 0, 1] = -n.sin(up_mat)
+			R_up[:, :, :, :, 1, 0] = n.sin(up_mat)
+			R_up[:, :, :, :, 1, 1] = n.cos(up_mat)
+			R_up[:, :, :, :, 2, 2] = 1.
+			R_up[:, :, :, :, 3, 3] = 1.
+			if t_z != "None":
+				T_det[:, :, :, :, 0, 0] = -1. / n.cos(t_zz - 2 * n.mean(th))
+		elif mode == "vertical":
+			Theta[:, :, :, :, 0, 0] = 1.
+			Theta[:, :, :, :, 1, 1] = n.cos(th_mat)
+			Theta[:, :, :, :, 1, 2] = -n.sin(th_mat)
+			Theta[:, :, :, :, 2, 1] = n.sin(th_mat)
+			Theta[:, :, :, :, 2, 2] = n.cos(th_mat)
+			Theta[:, :, :, :, 3, 3] = 1.
+			Omega[:, :, :, :, 0, 0] = n.cos(om_mat)
+			Omega[:, :, :, :, 0, 1] = -n.sin(om_mat)
+			Omega[:, :, :, :, 1, 0] = n.sin(om_mat)
+			Omega[:, :, :, :, 1, 1] = n.cos(om_mat)
+			Omega[:, :, :, :, 2, 2] = 1.
+			Omega[:, :, :, :, 3, 3] = 1.
+			# NB Should define around which axes the upper and lower rotation belong
+			R_lo[:, :, :, :, 0, 0] = 1.
+			R_lo[:, :, :, :, 1, 1] = 1.
+			R_lo[:, :, :, :, 2, 2] = 1.
+			R_lo[:, :, :, :, 3, 3] = 1.
+			R_up[:, :, :, :, 0, 0] = 1.
+			R_up[:, :, :, :, 1, 1] = 1.
+			R_up[:, :, :, :, 2, 2] = 1.
+			R_up[:, :, :, :, 3, 3] = 1.
+			if t_x != "None":
+				T_det[:, :, :, :, 2, 2] = -1. / n.cos(t_xx - 2 * n.mean(th))
+		else:
+			print "ERROR: scattering geometry not defined"
+
+		T_s2d = M * n.matmul(
+			T_det,
+			n.matmul(
+				Tinv_th,
+				n.matmul(
+					Theta,
+					n.matmul(
+						T_th,
+						n.matmul(
+							Omega,
+							n.matmul(
+								Tinv_lo,
+								n.matmul(
+									R_lo,
+									n.matmul(
+										T_lo,
+										n.matmul(
+											Tinv_up,
+											n.matmul(
+												R_up,
+												T_up))))))))))
 		return T_s2d
 
 if __name__ == "__main__":
