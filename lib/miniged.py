@@ -84,7 +84,7 @@ class GetEdfData(object):
 
 		self.getFilelists(filename, bg_filename)
 
-		self.getBGarray()
+		self.getBGarray(bg_filename)
 		self.getMetaData()
 
 	def setTest(self, testcase):
@@ -95,20 +95,21 @@ class GetEdfData(object):
 
 	def getFilelists(self, filename, bg_filename):
 		onlyfiles = [f for f in listdir(self.path) if isfile(join(self.path, f))]
-		onlyfiles_bg = [
-			f for f in listdir(self.bg_path) if
-			isfile(join(self.bg_path, f))]
-
 		self.data_files = []
-		self.bg_files = []
 
 		for k in onlyfiles[:]:
 			if k[:len(filename)] == filename:
 				self.data_files.append(k)
 
-		for k in onlyfiles_bg[:]:
-			if k[:len(bg_filename)] == bg_filename:
-				self.bg_files.append(k)
+		if bg_filename != '-':
+			onlyfiles_bg = [
+				f for f in listdir(self.bg_path) if
+				isfile(join(self.bg_path, f))]
+
+			self.bg_files = []
+			for k in onlyfiles_bg[:]:
+				if k[:len(bg_filename)] == bg_filename:
+					self.bg_files.append(k)
 
 	def getROI(self):
 		return self.roi
@@ -116,37 +117,41 @@ class GetEdfData(object):
 	def setROI(self, roi):
 		self.roi = roi
 
-	def getBGarray(self):
-		bg_file_with_path = self.bg_path + '/' + self.bg_files[0]
-		bg_class = EdfFile.EdfFile(bg_file_with_path)
-		bg_img = bg_class.GetData(0).astype(np.int64)[
-			self.roi[2]:self.roi[3], self.roi[0]:self.roi[1]]
+	def getBGarray(self, bg_filename):
+		if self.bg_path == '-' and bg_filename == '-':
+			self.bg_combined = np.zeros((self.roi[3], self.roi[1]))
 
-		self.bg_combined = np.zeros(np.shape(bg_img))
-
-		if self.rank == 0:
-			print "Reading background files (ROI)..."
-
-		for i in range(len(self.bg_files)):
-			bg_file_with_path = self.bg_path + '/' + self.bg_files[i]
+		else:
+			bg_file_with_path = self.bg_path + '/' + self.bg_files[0]
 			bg_class = EdfFile.EdfFile(bg_file_with_path)
-			self.bg_combined += bg_class.GetData(0).astype(np.int64)[
+			bg_img = bg_class.GetData(0).astype(np.int64)[
 				self.roi[2]:self.roi[3], self.roi[0]:self.roi[1]]
 
-		self.bg_combined /= len(self.bg_files)
+			self.bg_combined = np.zeros(np.shape(bg_img))
 
-		bg_img_full = bg_class.GetData(0).astype(np.int64)
-		self.bg_combined_full = np.zeros(np.shape(bg_img_full))
+			if self.rank == 0:
+				print "Reading background files (ROI)..."
 
-		if self.rank == 0:
-			print "Reading background files (Full)..."
+			for i in range(len(self.bg_files)):
+				bg_file_with_path = self.bg_path + '/' + self.bg_files[i]
+				bg_class = EdfFile.EdfFile(bg_file_with_path)
+				self.bg_combined += bg_class.GetData(0).astype(np.int64)[
+					self.roi[2]:self.roi[3], self.roi[0]:self.roi[1]]
 
-		for i in range(len(self.bg_files)):
-			bg_file_with_path = self.bg_path + '/' + self.bg_files[i]
-			bg_class = EdfFile.EdfFile(bg_file_with_path)
-			self.bg_combined_full += bg_class.GetData(0).astype(np.int64)
+			self.bg_combined /= len(self.bg_files)
 
-		self.bg_combined_full /= len(self.bg_files)
+			bg_img_full = bg_class.GetData(0).astype(np.int64)
+			self.bg_combined_full = np.zeros(np.shape(bg_img_full))
+
+			if self.rank == 0:
+				print "Reading background files (Full)..."
+
+			for i in range(len(self.bg_files)):
+				bg_file_with_path = self.bg_path + '/' + self.bg_files[i]
+				bg_class = EdfFile.EdfFile(bg_file_with_path)
+				self.bg_combined_full += bg_class.GetData(0).astype(np.int64)
+
+			self.bg_combined_full /= len(self.bg_files)
 
 	def getIndexList(self):
 		file_with_path = self.path + '/' + self.data_files[0]
@@ -163,8 +168,8 @@ class GetEdfData(object):
 
 				indexlist.append(ind)
 
-		indexlist.extend(header['motor_mne'].split(' '))
 		try:
+			indexlist.extend(header['motor_mne'].split(' '))
 			indexlist.extend(header['counter_mne'].split(' '))
 		except KeyError:
 			pass
@@ -208,13 +213,30 @@ class GetEdfData(object):
 
 				metalist.append(header[ind])
 
-		metalist.extend(header['motor_pos'].split(' '))
 		try:
+			metalist.extend(header['motor_pos'].split(' '))
 			metalist.extend(header['counter_pos'].split(' '))
 		except:
 			pass
 
 		return metalist
+
+	def makeMetaArraySimulated(self):
+		self.meta = np.zeros((len(self.data_files), 4))
+		self.getIndexList()
+		il = self.indexlist
+
+		if self.rank == 0:
+			print "Making meta array."
+
+		for i in range(len(self.meta)):
+			metalist = self.getFullHeader(i)
+			self.meta[i, 0] = round(float(metalist[il.index('phi_upper')]), 8)
+			self.meta[i, 1] = round(float(metalist[il.index('phi_lower')]), 8)
+			self.meta[i, 2] = round(float(metalist[il.index('Omega')]), 8)
+			# self.meta[i, 4] = round(float(motpos_array[mot_array.index('diffrx')]), 8)
+
+		self.meta = np.around(self.meta, decimals=8)
 
 	def makeMetaArrayNew(self):
 		self.meta = np.zeros((len(self.data_files), 4))
@@ -239,7 +261,8 @@ class GetEdfData(object):
 
 	def getMetaData(self):
 		print "Starting meta data collection."
-		self.makeMetaArrayNew()
+		# self.makeMetaArrayNew()
+		self.makeMetaArraySimulated()
 
 		alphavals = sorted(list(set(self.meta[:, 0])))
 		betavals = sorted(list(set(self.meta[:, 1])))
@@ -401,7 +424,7 @@ class GetEdfData(object):
 				popt, pcov = self.fitLine(ran, imgsum)
 				fittedline = ran * popt[0] + popt[1]
 				fittedline = fittedline - fittedline[len(fittedline) / 2]
-				gradient = np.tile(fittedline, (len(img0[:, 0]), 1)).transpose()
+				gradient = np.tile(fittedline, (len(img0[0, :]), 1)).transpose()
 				imgarray_part[i, :, :] = img0 - gradient
 
 			imgarray_part[0, 0, 0] = self.rank
