@@ -23,6 +23,7 @@ class main():
 		grain_ang = self.reconstruct_mpi()
 
 		if self.rank == 0:
+			self.outputfiles(grain_ang)
 			stop = time.time()
 			print "Time spent: {0:8.4f} seconds.".format(stop - start)
 
@@ -209,7 +210,8 @@ class main():
 			t_yy = np.pi * self.par['t_y'] / 180.
 			t_zz = np.pi * self.par['t_z'] / 180.
 		except:
-			print "No detector tilt"
+			if self.rank == 0:
+				print "No detector tilt"
 			self.par['t_x'] = "None"
 			self.par['t_z'] = "None"
 
@@ -236,7 +238,7 @@ class main():
 		T_det[:, :, :, :, 2, 2] = -1.
 		T_det[:, :, :, :, 3, 3] = 1.
 
-		print self.par['xyz_up']
+		# print self.par['xyz_up']
 		# 4x4 according
 		# to http://inside.mines.edu/fs_home/gmurray/ArbitraryAxisRotation/
 		T_up[:, :, :, :, 0:3, 3] = -np.array(self.par['xyz_up'])
@@ -346,6 +348,10 @@ class main():
 												R_up,
 												T_up))))))))))
 		return T_s2d
+
+	def outputfiles(self, grain_ang):
+		print "Saving grain_ang file..."
+		np.save(self.par['path'] + '/grain_ang.npy', grain_ang)
 
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
