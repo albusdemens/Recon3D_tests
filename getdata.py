@@ -80,7 +80,7 @@ class makematrix():
 			lenb = len(self.beta)
 			leno = len(self.omega)
 
-			bigarray = np.zeros((lena, lenb, leno, int(imsiz[0]), int(imsiz[1])))
+			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])))
 
 			for i, ind in enumerate(index_list):
 				a = np.where(self.alpha == met[ind, 0])
@@ -92,8 +92,8 @@ class makematrix():
 
 			np.save(self.directory + '/alpha.npy', self.alpha)
 			np.save(self.directory + '/beta.npy', self.beta)
-			np.save(self.directory + '/theta.npy', self.theta)
-			# np.save(self.directory + '/omega.npy', self.omega)
+			# np.save(self.directory + '/theta.npy', self.theta)
+			np.save(self.directory + '/omega.npy', self.omega)
 
 			np.save(self.directory + '/dataarray.npy', bigarray)
 
