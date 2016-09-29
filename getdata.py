@@ -27,7 +27,8 @@ class makematrix():
 	def __init__(
 		self, datadir,
 		dataname, bgpath, bgfilename,
-		poi, imgsize, outputpath, outputdir):
+		poi, imgsize, outputpath, outputdir,
+		sim=False):
 
 		try:
 			self.comm = MPI.COMM_WORLD
@@ -50,7 +51,7 @@ class makematrix():
 			int(int(poi[1]) - int(imgsize[1]) / 2),
 			int(int(poi[1]) + int(imgsize[1]) / 2)]
 
-		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi)
+		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
 		self.alpha, self.beta, self.omega = data.getMetaValues()
 
 		self.allFiles(data, imgsize)
@@ -100,7 +101,8 @@ class makematrix():
 
 if __name__ == "__main__":
 	if len(sys.argv) != 9:
-		print "Not enough input parameters. Data input should be:\n\
+		if len(sys.argv) != 10:
+			print "Not enough input parameters. Data input should be:\n\
 	Directory of data\n\
 	Name of data files\n\
 	Directory of background files\n\
@@ -110,6 +112,17 @@ if __name__ == "__main__":
 	Output path\n\
 	Name of new output directory to make\n\
 		"
+		else:
+			mm = makematrix(
+				sys.argv[1],
+				sys.argv[2],
+				sys.argv[3],
+				sys.argv[4],
+				sys.argv[5],
+				sys.argv[6],
+				sys.argv[7],
+				sys.argv[8],
+				sys.argv[9])
 	else:
 		mm = makematrix(
 			sys.argv[1],

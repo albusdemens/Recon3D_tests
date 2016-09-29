@@ -66,7 +66,8 @@ class GetEdfData(object):
 		filename,
 		bg_path,
 		bg_filename,
-		roi):
+		roi,
+		simulated):
 		super(GetEdfData, self).__init__()
 
 		try:
@@ -81,6 +82,7 @@ class GetEdfData(object):
 		self.path = path
 		self.bg_path = bg_path
 		self.roi = roi
+		self.simulated = simulated
 
 		self.getFilelists(filename, bg_filename)
 
@@ -261,8 +263,11 @@ class GetEdfData(object):
 
 	def getMetaData(self):
 		print "Starting meta data collection."
-		# self.makeMetaArrayNew()
-		self.makeMetaArraySimulated()
+		if self.simulated:
+			self.makeMetaArraySimulated()
+		else:
+			self.makeMetaArrayNew()
+
 
 		alphavals = sorted(list(set(self.meta[:, 0])))
 		betavals = sorted(list(set(self.meta[:, 1])))
