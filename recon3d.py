@@ -108,7 +108,7 @@ class main():
 		grain_pos = np.array(self.par['grain_pos'])
 
 		grain_xyz = np.zeros(grain_steps + [3])
-		grain_ang = np.zeros(grain_steps + [2])
+		grain_ang = np.zeros(grain_steps + [3])
 		grain_dimstep = np.array(grain_dim) / np.array(grain_steps)
 		# grain_prop = np.zeros(grain_steps)
 
@@ -167,10 +167,21 @@ class main():
 					prop = self.fullarray[:, :, range(lenf), detx_f, detz_f]
 
 					cos = list(ndimage.measurements.center_of_mass(np.sum(prop, 2)))
+
+					# print np.rint(cos[0]), np.rint(cos[1])
+					try:
+						grain_ang[ix, iy, iz, 2] = np.sum(prop) / len(np.where(prop != 0))
+						# grain_ang[ix, iy, iz, 2] = np.sum(
+						# 	prop, 2)[np.rint(cos[0]), np.rint(cos[1])] / np.sum(prop)
+					except IndexError:
+						pass
+
 					cos[0] = cos[0] * (mas - mis) / lens + mis
 					cos[1] = cos[1] * (mam - mim) / lenm + mim
 
-					grain_ang[ix, iy, iz, :] = cos
+					grain_ang[ix, iy, iz, :2] = cos
+
+					# print grain_ang[ix, iy, iz, 2]
 
 					if self.rank == 0:
 						t_8 = time.clock()
