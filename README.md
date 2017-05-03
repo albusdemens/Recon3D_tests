@@ -16,7 +16,7 @@ Future versions will be able to do reconstruction based on strain datasets.
 
 ## Preliminaries
 
-Running Recon3D requires installing Miniconda2 and Fable on Panda2, as described [here](https://github.com/acjak/fable-install). If you get an error message and need to change a permission path, check [this tip](http://stackoverflow.com/questions/35246386/conda-command-not-found).
+Running Recon3D requires having Miniconda2 and Fable on your Panda2 account. To install the packages, run the script available [here](https://github.com/acjak/fable-install). If you get an error message and need to change a permission path, check [this tip](http://stackoverflow.com/questions/35246386/conda-command-not-found).
 
 ## Reading data from .edf files to a NumPy array
 
