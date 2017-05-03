@@ -2,9 +2,15 @@
 
 *** Experimental - still a work in progress ***
 
-White paper that explains the principle can be found [here](https://github.com/acjak/Recon3D/raw/master/dfxm.pdf).
+Recon3D is a set of algorithms developed to analyze data collected using dark field X-ray microscopy ([DFXRM](https://www.nature.com/articles/ncomms7098)). DFXRM is a non-destructive technique which allows to select a single grain embedded in a polycrystalline sample and to reconstruct, in 3D, its shape and how crystal orientations are distributed in its interior. The technique has a spatial resolution of about 100 nm and an angular resolution superior to what provided by transmission electron microscopy (TEM). 
 
-Recon3D is a program to get a 3D reconstruction from topo-tomo data sets from ID06 at ESRF. The program takes data where a sample is rotated around the *diffrx* and at every point, a mosaicity scan is done. This is done through a forward projection algorithm to calculate a given voxel's reflected spot position on the detector.
+From the images collected at different sample rotation angles $\omega$, and at different rocking and rolling angles $\phi$ and $\chi$, Recon3D returns 
+1. A 3D reconstruction of the shape of the grain investigated using DFXRM
+2. A 3D map showing how crystal orientations and strain are distributed in the sample
+
+The white paper outling the principles used for developing the softwrae can be found [here](https://github.com/acjak/Recon3D/raw/master/dfxm.pdf).
+
+Recon3D is designed to consider, as input, topo-tomo data sets from ID06 at ESRF. The program takes data where a sample is rotated around the *diffrx* and at every point, a mosaicity scan is done. This is done through a forward projection algorithm to calculate a given voxel's reflected spot position on the detector.
 
 Future versions will be able to do reconstruction based on strain datasets.
 
