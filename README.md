@@ -49,4 +49,4 @@ $ mpirun -n 10 python recon3d.py [initfile]
 
 ## How to contribute
 
-Do you want to contribute? Check the wikipages on ([contribution](https://github.com/albusdemens/Recon3D/wiki/How-to-contribute)) and on suggested ([software](https://github.com/albusdemens/Recon3D/wiki/Suggested-software-tools)). 
+Do you want to contribute? Check the wikipages on [contribution](https://github.com/albusdemens/Recon3D/wiki/How-to-contribute) and on suggested [software](https://github.com/albusdemens/Recon3D/wiki/Suggested-software-tools). 
