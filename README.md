@@ -14,7 +14,7 @@ Recon3D is designed to consider, as input, topo-tomo data sets from ID06 at ESRF
 
 Future versions will be able to do reconstruction based on strain datasets.
 
-## Reading data from .edf files to a NumPy array.
+## Reading data from .edf files to a NumPy array
 
 The script getdata.py reads data from .edf files and outputs a NumPy array with the dimensions *tilt1*-steps x *tilt2*-steps x *omega*-steps x *img_xlen* x *img_ylen*, where *tilt1* and *tilt2* are the two top tilts in the LAB goniometer at ID06. *Omega* is the topo-tomo rotation stage. The command to create the array is the following:
 
@@ -41,8 +41,12 @@ If MPI is available, the following command will run the script in 10 processes a
 $ mpirun -n 10 python getdata.py [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname]
 ```
 
-## Running the reconstruction algorithm on a data set.
+## Running the reconstruction algorithm on a data set
 
 ```
 $ mpirun -n 10 python recon3d.py [initfile]
 ```
+
+## How to contribute
+
+Do you want to contribute? Check the wikipages on ([contribution](https://github.com/albusdemens/Recon3D/wiki/How-to-contribute)) and on suggested ([software](https://github.com/albusdemens/Recon3D/wiki/Suggested-software-tools)). 
