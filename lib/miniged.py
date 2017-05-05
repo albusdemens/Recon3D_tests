@@ -250,9 +250,9 @@ class GetEdfData(object):
 
 			mot_array, motpos_array, det_array, detpos_array, srcur = self.getHeader(i)
 
-			self.meta[i, 0] = round(float(motpos_array[mot_array.index('samrz')]), 8)
-			self.meta[i, 1] = round(float(motpos_array[mot_array.index('samry')]), 8)
-			self.meta[i, 2] = round(float(motpos_array[mot_array.index('diffrx')]), 8)
+			self.meta[i, 0] = round(float(motpos_array[mot_array.index('phi')]), 8)
+			self.meta[i, 1] = round(float(motpos_array[mot_array.index('chi')]), 8)
+			self.meta[i, 2] = round(float(motpos_array[mot_array.index('diffry')]), 8)
 			# self.meta[i, 4] = round(float(motpos_array[mot_array.index('diffrx')]), 8)
 			if srcur == 0:
 				self.meta[i, 3] = round(float(motpos_array[det_array.index('srcur')]), 8)
