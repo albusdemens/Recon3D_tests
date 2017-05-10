@@ -337,27 +337,30 @@ class main():
 		else:
 			print "ERROR: scattering geometry not defined"
 
-		T_s2d = self.par['M'] * np.matmul(
-			T_det,
+		# Let's multiply all the matrices. flipud takes into account the
+		# vertical flip introduced by the lens system
+		T_s2d = self.par['M'] * np.flipud(
 			np.matmul(
-				Tinv_th,
+				T_det,
 				np.matmul(
-					Theta,
+					Tinv_th,
 					np.matmul(
-						T_th,
+						Theta,
 						np.matmul(
-							Omega,
+							T_th,
 							np.matmul(
-								Tinv_lo,
+								Omega,
 								np.matmul(
-									R_lo,
+									Tinv_lo,
 									np.matmul(
-										T_lo,
+										R_lo,
 										np.matmul(
-											Tinv_up,
+											T_lo,
 											np.matmul(
-												R_up,
-												T_up))))))))))
+												Tinv_up,
+												np.matmul(
+													R_up,
+													T_up)))))))))))
 		return T_s2d
 
 	def outputfiles(self, grain_ang):
