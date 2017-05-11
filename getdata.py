@@ -5,6 +5,7 @@ import os
 import warnings
 import numpy as np
 import pdb 	# For debugging
+from find_nearest import find_nearest
 
 try:
 	from mpi4py import MPI
@@ -54,12 +55,19 @@ class makematrix():
 
 		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
 		self.alpha, self.beta, self.omega = data.getMetaValues() # Redefine
-		min_alpha = min(self.alpha)
-		max_alpha = max(self.alpha)
-		min_beta = min(self.beta)
-		max_beta = max(self.beta)
-		print min_alpha, max_alpha, min_beta, max_beta
 
+		# Alpha and beta values were measured at irregular steps. To make things
+		# easy, we bin the values in 7 intervals per variable
+		[count_alpha, extremes_alpha] = np.histogram(self.alpha, 7)
+		val_alpha = np.zeros(len(extremes_alpha)-1)
+
+		# Find center of each bin
+		for i in range(0,len(extremes_alpha)-1):
+			val_alpha[i] = np.mean([extremes_alpha[i], extremes_alpha[i+1]])
+
+		# For each experimental value, find closest bin centre
+		
+		print find_nearest(val_alpha, self.alpha[1])
 		pdb.set_trace()
 
 		print self.alpha
