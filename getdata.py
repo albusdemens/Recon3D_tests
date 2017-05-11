@@ -4,6 +4,7 @@ import time
 import os
 import warnings
 import numpy as np
+import pdb 	# For debugging
 
 try:
 	from mpi4py import MPI
@@ -52,8 +53,21 @@ class makematrix():
 			int(int(poi[1]) + int(imgsize[1]) / 2)]
 
 		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
-		self.alpha, self.beta, self.omega = data.getMetaValues()
+		self.alpha, self.beta, self.omega = data.getMetaValues() # Redefine
+		min_alpha = min(self.alpha)
+		max_alpha = max(self.alpha)
+		min_beta = min(self.beta)
+		max_beta = max(self.beta)
+		print min_alpha, max_alpha, min_beta, max_beta
 
+		pdb.set_trace()
+
+		print self.alpha
+		print self.beta
+		print self.omega
+		print len(self.alpha)
+		print len(self.beta)
+		print len(self.omega)
 		self.allFiles(data, imgsize)
 
 		if self.rank == 0:
@@ -77,9 +91,12 @@ class makematrix():
 			imgarray = data.makeImgArray(index_list, 50, 'linetrace')
 
 		if self.rank == 0:
-			lena = len(self.alpha)
-			lenb = len(self.beta)
+			lena = 7#len(self.alpha)
+			lenb = 7#len(self.beta)
 			leno = len(self.omega)
+			#lena = len(self.alpha)
+			#lenb = len(self.beta)
+			#leno = len(self.omega)
 
 			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])))
 
@@ -132,4 +149,4 @@ if __name__ == "__main__":
 			sys.argv[5],
 			sys.argv[6],
 			sys.argv[7],
-			sys.argv[8],)
+			sys.argv[8])
