@@ -66,8 +66,10 @@ class makematrix():
 			val_alpha[i] = np.mean([extremes_alpha[i], extremes_alpha[i+1]])
 
 		# For each experimental value, find closest bin centre
+		alpha_discr = np.zeros(len(self.alpha))
+		for i in range(0, len(self.alpha)):
+			alpha_discr[i] = find_nearest(val_alpha,self.alpha[i])
 
-		print extremes_alpha
 		pdb.set_trace()
 
 		print self.alpha
