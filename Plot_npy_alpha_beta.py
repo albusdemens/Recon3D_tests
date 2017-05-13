@@ -43,9 +43,6 @@ for j in range(0,len(val_alpha)):
     v[j,0] = find_nearest(beta,val_beta[j])
     v[j,1] = find_nearest_idx(beta,val_beta[j])
 
-print u
-print v
-
 # Plot distribution of motor values
 ar = range(len(alpha))
 br = range(len(beta))
@@ -81,5 +78,16 @@ for i in range(0,len(val_beta)):
     plt.scatter(v[i,0], v[i,1])
 plt.xlabel('Beta (in degrees)')
 plt.ylabel('Acquisition number')
+
+# Plot hist showing how angular values are distributed in the different bins
+plt.figure(2)
+
+plt.subplot(121)
+plt.hist(alpha, 7)
+plt.title('Binning of alpha values')
+
+plt.subplot(122)
+plt.hist(beta, 7)
+plt.title('Binning of beta values')
 
 plt.show()
