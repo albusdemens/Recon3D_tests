@@ -60,24 +60,28 @@ class makematrix():
 		# easy, we bin the values in 7 intervals per variable
 		[count_alpha, extremes_alpha] = np.histogram(self.alpha, 7)
 		val_alpha = np.zeros(len(extremes_alpha)-1)
+		[count_beta, extremes_beta] = np.histogram(self.beta, 7)
+		val_beta = np.zeros(len(extremes_beta)-1)
 
 		# Find center of each bin
 		for i in range(0,len(extremes_alpha)-1):
 			val_alpha[i] = np.mean([extremes_alpha[i], extremes_alpha[i+1]])
+		for j in range(0,len(extremes_beta)-1):
+			val_beta[j] = np.mean([extremes_beta[j], extremes_beta[j+1]])
 
 		# For each experimental value, find closest bin centre
 		alpha_discr = np.zeros(len(self.alpha))
 		for i in range(0, len(self.alpha)):
 			alpha_discr[i] = find_nearest(val_alpha,self.alpha[i])
+		beta_discr = np.zeros(len(self.beta))
+		for j in range(0, len(self.beta)):
+			beta_discr[j] = find_nearest(val_beta,self.beta[j])
 
 		pdb.set_trace()
 
 		print self.alpha
 		print self.beta
 		print self.omega
-		print len(self.alpha)
-		print len(self.beta)
-		print len(self.omega)
 		self.allFiles(data, imgsize)
 
 		if self.rank == 0:
@@ -101,9 +105,12 @@ class makematrix():
 			imgarray = data.makeImgArray(index_list, 50, 'linetrace')
 
 		if self.rank == 0:
-			lena = 7#len(self.alpha)
-			lenb = 7#len(self.beta)
+			# If we need to bin the angular values
+			lena = len(alpha_discr)
+			lenb = len(beta_discr)
 			leno = len(self.omega)
+
+			# If we don't need to bin the angular values
 			#lena = len(self.alpha)
 			#lenb = len(self.beta)
 			#leno = len(self.omega)
