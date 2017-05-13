@@ -194,10 +194,6 @@ class GetEdfData(object):
 			detpos_array = []
 
 		try:
-<<<<<<< d0da2f49fba4d23fbd70626e49401f10c87d865b
-=======
-			#print header['machine current'].split(' ')
->>>>>>> Binning angular values (irregular motor steps)
 			srcur = float(header['machine current'].split(' ')[0])
 		except KeyError:
 			srcur = 0
@@ -254,7 +250,6 @@ class GetEdfData(object):
 
 			mot_array, motpos_array, det_array, detpos_array, srcur = self.getHeader(i)
 
-			# Option: bin data
 			self.meta[i, 0] = round(float(motpos_array[mot_array.index('phi')]), 8)
 			self.meta[i, 1] = round(float(motpos_array[mot_array.index('chi')]), 8)
 			self.meta[i, 2] = round(float(motpos_array[mot_array.index('diffry')]), 8)
