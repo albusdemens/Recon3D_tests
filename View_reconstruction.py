@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import os
 import matplotlib.pyplot as plt
-import mayavi.mlab as mlab
+import mayavi.mlab as mlab  # Idea from http://stackoverflow.com/questions/10755060/plot-a-cube-of-3d-intensity-data
 
 '''
 Input : directory of data
