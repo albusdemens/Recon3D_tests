@@ -77,11 +77,8 @@ class makematrix():
 		for j in range(0, len(self.beta)):
 			beta_discr[j] = find_nearest(val_beta,self.beta[j])
 
-		pdb.set_trace()
+		global alpha_discr, beta_discr, val_alpha, val_beta
 
-		print self.alpha
-		print self.beta
-		print self.omega
 		self.allFiles(data, imgsize)
 
 		if self.rank == 0:
@@ -106,8 +103,8 @@ class makematrix():
 
 		if self.rank == 0:
 			# If we need to bin the angular values
-			lena = len(alpha_discr)
-			lenb = len(beta_discr)
+			lena = len(val_alpha)
+			lenb = len(val_beta)
 			leno = len(self.omega)
 
 			# If we don't need to bin the angular values
@@ -118,8 +115,10 @@ class makematrix():
 			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])))
 
 			for i, ind in enumerate(index_list):
-				a = np.where(self.alpha == met[ind, 0])
-				b = np.where(self.beta == met[ind, 1])
+				a = np.where(alpha_discr == met[ind, 0])
+				b = np.where(alpha_discr == met[ind, 1])
+				#a = np.where(self.alpha == met[ind, 0])
+				#b = np.where(self.beta == met[ind, 1])
 				c = np.where(self.omega == met[ind, 2])
 				# d = np.where(self.theta == met[ind, 4])
 
