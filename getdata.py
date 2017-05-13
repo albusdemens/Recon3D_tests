@@ -5,7 +5,7 @@ import os
 import warnings
 import numpy as np
 import pdb 	# For debugging
-from find_nearest import find_nearest
+from find_nearest import find_nearest, find_nearest_idx
 
 try:
 	from mpi4py import MPI
@@ -67,7 +67,7 @@ class makematrix():
 
 		# For each experimental value, find closest bin centre
 
-		print find_nearest(val_alpha, self.alpha[1])
+		print extremes_alpha
 		pdb.set_trace()
 
 		print self.alpha
