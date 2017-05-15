@@ -113,8 +113,8 @@ class makematrix():
 			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
 			for i, ind in enumerate(index_list):
-				a = np.where(alpha_discr == met[ind, 0])
-				b = np.where(alpha_discr == met[ind, 1])
+				a = np.where(self.alpha_discr == met[ind, 0])
+				b = np.where(self.alpha_discr == met[ind, 1])
 				#a = np.where(self.alpha == met[ind, 0])
 				#b = np.where(self.beta == met[ind, 1])
 				c = np.where(self.omega == met[ind, 2])
@@ -122,8 +122,8 @@ class makematrix():
 
 				bigarray[a, b, c, :, :] = imgarray[ind, :, :]
 
-			np.save(self.directory + '/alpha.npy', self.alpha)
-			np.save(self.directory + '/beta.npy', self.beta)
+			np.save(self.directory + '/alpha.npy', list(set(self.alpha_discr)))
+			np.save(self.directory + '/beta.npy', list(set(self.beta_discr)))
 			# np.save(self.directory + '/theta.npy', self.theta)
 			np.save(self.directory + '/omega.npy', self.omega)
 

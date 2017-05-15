@@ -164,7 +164,7 @@ class main():
 					detz_f[detz_f < 0] = 0
 					detz_f[detz_f >= detz_size] = detz_size - 1
 
-					prop = self.fullarray[:, :, range(lenf), detx_f, detz_f]
+					prop = self.fullarray[:, :, range(lenf), detx_f, detz_f] # Find CM
 
 					cos = list(ndimage.measurements.center_of_mass(np.sum(prop, 2)))
 
@@ -228,6 +228,7 @@ class main():
 
 		th_mat, om_mat, lo_mat, up_mat = np.meshgrid(th, om, lo, up, indexing='ij')
 
+		print('Introduce matrices')
 		R_up = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
 		R_lo = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
 		Omega = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
@@ -283,6 +284,7 @@ class main():
 		Tinv_th[:, :, :, :, 2, 2] = 1.
 		Tinv_th[:, :, :, :, 3, 3] = 1.
 
+		print('Define horizontal mode')
 		if self.par['mode'] == "horizontal":
 			Theta[:, :, :, :, 0, 0] = np.cos(th_mat)
 			Theta[:, :, :, :, 0, 1] = -np.sin(th_mat)
@@ -337,6 +339,7 @@ class main():
 		else:
 			print "ERROR: scattering geometry not defined"
 
+		print('Multiply all matrices')
 		# Let's multiply all the matrices. flipud takes into account the
 		# vertical flip introduced by the lens system
 		T_s2d = self.par['M'] * np.flipud(
@@ -361,6 +364,7 @@ class main():
 												np.matmul(
 													R_up,
 													T_up)))))))))))
+
 		return T_s2d
 
 	def outputfiles(self, grain_ang):
