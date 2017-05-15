@@ -59,25 +59,23 @@ class makematrix():
 		# Alpha and beta values were measured at irregular steps. To make things
 		# easy, we bin the values in 7 intervals per variable
 		[count_alpha, extremes_alpha] = np.histogram(self.alpha, 7)
-		val_alpha = np.zeros(len(extremes_alpha)-1)
+		self.val_alpha = np.zeros(len(extremes_alpha)-1)
 		[count_beta, extremes_beta] = np.histogram(self.beta, 7)
-		val_beta = np.zeros(len(extremes_beta)-1)
+		self.val_beta = np.zeros(len(extremes_beta)-1)
 
 		# Find center of each bin
 		for i in range(0,len(extremes_alpha)-1):
-			val_alpha[i] = np.mean([extremes_alpha[i], extremes_alpha[i+1]])
+			self.val_alpha[i] = np.mean([extremes_alpha[i], extremes_alpha[i+1]])
 		for j in range(0,len(extremes_beta)-1):
-			val_beta[j] = np.mean([extremes_beta[j], extremes_beta[j+1]])
+			self.val_beta[j] = np.mean([extremes_beta[j], extremes_beta[j+1]])
 
 		# For each experimental value, find closest bin centre
-		alpha_discr = np.zeros(len(self.alpha))
+		self.alpha_discr = np.zeros(len(self.alpha))
 		for i in range(0, len(self.alpha)):
-			alpha_discr[i] = find_nearest(val_alpha,self.alpha[i])
-		beta_discr = np.zeros(len(self.beta))
+			self.alpha_discr[i] = find_nearest(self.val_alpha,self.alpha[i])
+		self.beta_discr = np.zeros(len(self.beta))
 		for j in range(0, len(self.beta)):
-			beta_discr[j] = find_nearest(val_beta,self.beta[j])
-
-		global alpha_discr, beta_discr, val_alpha, val_beta
+			self.beta_discr[j] = find_nearest(self.val_beta,self.beta[j])
 
 		self.allFiles(data, imgsize)
 
@@ -103,8 +101,8 @@ class makematrix():
 
 		if self.rank == 0:
 			# If we need to bin the angular values
-			lena = len(val_alpha)
-			lenb = len(val_beta)
+			lena = len(self.val_alpha)
+			lenb = len(self.val_beta)
 			leno = len(self.omega)
 
 			# If we don't need to bin the angular values
@@ -112,7 +110,7 @@ class makematrix():
 			#lenb = len(self.beta)
 			#leno = len(self.omega)
 
-			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])))
+			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
 			for i, ind in enumerate(index_list):
 				a = np.where(alpha_discr == met[ind, 0])
