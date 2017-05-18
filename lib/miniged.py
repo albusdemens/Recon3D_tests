@@ -194,7 +194,7 @@ class GetEdfData(object):
 			detpos_array = []
 
 		try:
-			srcur = header['machine current'].split(' ')[-2]
+			srcur = float(header['machine current'].split(' ')[0])
 		except KeyError:
 			srcur = 0
 
