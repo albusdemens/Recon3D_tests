@@ -366,6 +366,127 @@ class main():
 
 		return T_s2d
 
+
+def build_rotation_lookup_eta_mu(self):
+	"""
+	Set up the rotation_lookup[theta,omega,mu] lookup table of
+	rotation matrices for each value in the theta, omega and mu arrays.
+
+	This general version incorporates the possibility that the focus points of
+	phi_up, phi_lo and/or theta do not coincide with the intersection of the
+	direct beam and the rotation axis, which is the commonly defined center.
+
+	Takes (x_s,y_s,z_s,1) and converts to (x_r,0,z_r,1) by a 4x4 matrix
+	taking rotations and translations of beam centers into account.
+
+	xyz_up, xyz_lo, xyz_th should be the coordinates (in microns) of the focus
+	point on the rotation axis, eg yxz_up=[-40,0,0] in horizontal geometry.
+	"""
+
+	om = np.pi * self.omega / 180.
+	# th = np.pi * self.par['theta'] / 180.
+	th = np.pi * self.omega / 180.
+	eta = np.pi * self.eta / 180.
+
+	try:
+		t_xx = np.pi * self.par['t_x'] / 180.
+		t_yy = np.pi * self.par['t_y'] / 180.
+		t_zz = np.pi * self.par['t_z'] / 180.
+	except:
+		if self.rank == 0:
+			print "No detector tilt"
+		self.par['t_x'] = "None"
+		self.par['t_z'] = "None"
+
+	th_mat, om_mat, eta_mat = np.meshgrid(th, om, eta, indexing='ij')
+
+	print('Introduce matrices')
+	Eta = np.zeros((len(th), len(om), len(eta), 4, 4))
+	Omega = np.zeros((len(th), len(om), len(eta), 4, 4))
+	Theta = np.zeros((len(th), len(om), len(eta), 4, 4))
+	T_det = np.zeros((len(th), len(om), len(eta), 4, 4))
+	T_eta = np.zeros((len(th), len(om), len(eta), 4, 4))
+	Tinv_eta = np.zeros((len(th), len(om), len(eta), 4, 4))
+
+	# The default detector tilt is the unit matrix, i.e. an ideal detector
+	# positioned perpendicular to the diffracted beam (t_x=t=y=t_z=None).
+	# This can be changed by supplying tilts t_x (vertical) or t_z (horizontal).
+	T_det[:, :, :, :, 0, 0] = -1.
+	# T_det[:, :, :, :, 1, 1] = 1. #leaving T_det[:, :, :, :, 1, 1]=0
+	# gives the projection onto the detector plane
+	T_det[:, :, :, :, 2, 2] = -1.
+	T_det[:, :, :, :, 3, 3] = 1.
+
+	# print self.par['xyz_up']
+	# 4x4 according
+	# to http://inside.mines.edu/fs_home/gmurray/ArbitraryAxisRotation/
+
+	T_th[:, :, :, :, 0:3, 3] = -np.array(self.par['xyz_th'])
+	T_th[:, :, :, :, 0, 0] = 1.
+	T_th[:, :, :, :, 1, 1] = 1.
+	T_th[:, :, :, :, 2, 2] = 1.
+	T_th[:, :, :, :, 3, 3] = 1.
+	Tinv_th[:, :, :, :, 0:3, 3] = np.array(self.par['xyz_th'])
+	Tinv_th[:, :, :, :, 0, 0] = 1.
+	Tinv_th[:, :, :, :, 1, 1] = 1.
+	Tinv_th[:, :, :, :, 2, 2] = 1.
+	Tinv_th[:, :, :, :, 3, 3] = 1.
+	T_eta[:, :, :, :, 0:3, 3] = -np.array(self.par['xyz_th'])
+	T_eta[:, :, :, :, 0, 0] = 1.
+	T_eta[:, :, :, :, 1, 1] = 1.
+	T_eta[:, :, :, :, 2, 2] = 1.
+	T_eta[:, :, :, :, 3, 3] = 1.
+	Tinv_eta[:, :, :, :, 0:3, 3] = np.array(self.par['xyz_th'])
+	Tinv_eta[:, :, :, :, 0, 0] = 1.
+	Tinv_eta[:, :, :, :, 1, 1] = 1.
+	Tinv_eta[:, :, :, :, 2, 2] = 1.
+	Tinv_eta[:, :, :, :, 3, 3] = 1.
+
+	print('Define horizontal mode')
+	if self.par['mode'] == "horizontal":
+		Theta[:, :, :, :, 0, 0] = np.cos(th_mat)
+		Theta[:, :, :, :, 0, 1] = -np.sin(th_mat)
+		Theta[:, :, :, :, 1, 0] = np.sin(th_mat)
+		Theta[:, :, :, :, 1, 1] = np.cos(th_mat)
+		Theta[:, :, :, :, 2, 2] = 1.
+		Theta[:, :, :, :, 3, 3] = 1.
+		Omega[:, :, :, :, 0, 0] = 1.
+		Omega[:, :, :, :, 1, 1] = np.cos(om_mat)
+		Omega[:, :, :, :, 1, 2] = -np.sin(om_mat)
+		Omega[:, :, :, :, 2, 1] = np.sin(om_mat)
+		Omega[:, :, :, :, 2, 2] = np.cos(om_mat)
+		Omega[:, :, :, :, 3, 3] = 1.
+		Eta[:, :, :, :, 0, 0] = np.cos(eta_mat)
+		Eta[:, :, :, :, 0, 2] = np.sin(eta_mat)
+		Eta[:, :, :, :, 1, 1] = 1
+		Eta[:, :, :, :, 2, 0] = -np.sin(eta_mat)
+		Eta[:, :, :, :, 2, 2] = np.cos(eta_mat)
+		Eta[:, :, :, :, 3, 3] = 1.
+		if self.par['t_z'] != "None":
+			T_det[:, :, :, :, 0, 0] = -1. / np.cos(t_zz - 2 * np.mean(th))
+	else:
+		print "ERROR: scattering geometry not defined"
+
+	print('Multiply all matrices')
+	# Let's multiply all the matrices. flipud takes into account the
+	# vertical flip introduced by the lens system
+	T_s2d = self.par['M'] * np.matmul(
+			T_det,
+			np.matmul(
+				Tinv_th,
+				np.matmul(
+					Theta,
+					np.matmul(
+						T_th,
+						np.matmul(
+						Tinv_eta,
+						np.matmul(
+							Eta,
+							np.matmul(
+							T_eta, Omega)))))))
+
+	return T_s2d
+
 	def outputfiles(self, grain_ang):
 		print "Saving grain_ang file..."
 		np.save(self.par['path'] + '/grain_ang.npy', grain_ang)
