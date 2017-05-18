@@ -342,8 +342,7 @@ class main():
 		print('Multiply all matrices')
 		# Let's multiply all the matrices. flipud takes into account the
 		# vertical flip introduced by the lens system
-		T_s2d = self.par['M'] * np.flipud(
-			np.matmul(
+		T_s2d = self.par['M'] * np.matmul(
 				T_det,
 				np.matmul(
 					Tinv_th,
@@ -363,7 +362,7 @@ class main():
 												Tinv_up,
 												np.matmul(
 													R_up,
-													T_up)))))))))))
+													T_up))))))))))
 
 		return T_s2d
 
