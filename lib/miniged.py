@@ -271,7 +271,7 @@ class GetEdfData(object):
 		alphavals = sorted(list(set(self.meta[:, 0])))
 		betavals = sorted(list(set(self.meta[:, 1])))
 		gammavals = sorted(list(set(self.meta[:, 2])))
-		thetavals = sorted(list(set(self.meta[:, 2])))
+		thetavals = sorted(list(set(self.meta[:, 4])))
 		self.alphavals = np.zeros((len(alphavals)))
 		self.betavals = np.zeros((len(betavals)))
 		self.gammavals = np.zeros((len(gammavals)))
