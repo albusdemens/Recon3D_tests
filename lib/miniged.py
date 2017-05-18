@@ -24,17 +24,18 @@ An example of using the class can be found in the test function at the bottom
 of this file.
 """
 
-import os
+# import os
 import numpy as np
 import EdfFile
 import warnings
 import time
 import sys
+import scipy
 
 from os import listdir
 from os.path import isfile, join
 
-from time import localtime, strftime
+# from time import localtime, strftime
 
 try:
 	from mpi4py import MPI
@@ -43,7 +44,6 @@ except ImportError:
 
 
 class GetEdfData(object):
-
 	"""Initialization of GetEdfData.
 
 	The class is initialized with:
@@ -218,7 +218,7 @@ class GetEdfData(object):
 		try:
 			metalist.extend(header['motor_pos'].split(' '))
 			metalist.extend(header['counter_pos'].split(' '))
-		except:
+		except KeyError:
 			pass
 
 		return metalist
@@ -241,7 +241,7 @@ class GetEdfData(object):
 		self.meta = np.around(self.meta, decimals=8)
 
 	def makeMetaArrayNew(self):
-		self.meta = np.zeros((len(self.data_files), 4))
+		self.meta = np.zeros((len(self.data_files), 5))
 
 		if self.rank == 0:
 			print "Making meta array."
@@ -253,7 +253,7 @@ class GetEdfData(object):
 			self.meta[i, 0] = round(float(motpos_array[mot_array.index('phi')]), 8)
 			self.meta[i, 1] = round(float(motpos_array[mot_array.index('chi')]), 8)
 			self.meta[i, 2] = round(float(motpos_array[mot_array.index('diffry')]), 8)
-			# self.meta[i, 4] = round(float(motpos_array[mot_array.index('diffrx')]), 8)
+			self.meta[i, 4] = round(float(motpos_array[mot_array.index('diffrz')]), 8)
 			if srcur == 0:
 				self.meta[i, 3] = round(float(motpos_array[det_array.index('srcur')]), 8)
 			else:
@@ -268,23 +268,27 @@ class GetEdfData(object):
 		else:
 			self.makeMetaArrayNew()
 
-
 		alphavals = sorted(list(set(self.meta[:, 0])))
 		betavals = sorted(list(set(self.meta[:, 1])))
 		gammavals = sorted(list(set(self.meta[:, 2])))
+		thetavals = sorted(list(set(self.meta[:, 2])))
 		self.alphavals = np.zeros((len(alphavals)))
 		self.betavals = np.zeros((len(betavals)))
 		self.gammavals = np.zeros((len(gammavals)))
+		self.thetavals = np.zeros((len(thetavals)))
 		for i in range(len(alphavals)):
 			self.alphavals[i] = float(alphavals[i])
 		for i in range(len(betavals)):
 			self.betavals[i] = float(betavals[i])
 		for i in range(len(gammavals)):
 			self.gammavals[i] = float(gammavals[i])
+		for i in range(len(thetavals)):
+			self.thetavals[i] = float(thetavals[i])
 
 		self.alpha0 = self.alphavals[len(self.alphavals) / 2]
 		self.beta0 = self.betavals[len(self.betavals) / 2]
 		self.gamma0 = self.gammavals[len(self.gammavals) / 2]
+		self.theta0 = self.thetavals[len(self.thetavals) / 2]
 
 		if self.rank == 0:
 			print "Meta data from %s files read." % str(len(self.data_files))
@@ -306,22 +310,22 @@ class GetEdfData(object):
 		except RuntimeError:
 			pass
 
-	def getIndex(self, alpha, beta, gamma):
-		if alpha != -10000 and beta == -10000:
-			index = np.where(self.meta[:, 0] == alpha)
-		if alpha == -10000 and beta != -10000:
-			index = np.where(self.meta[:, 1] == beta)
-		if alpha != -10000 and beta != -10000 and gamma == -10000:
-			i1 = np.where(self.meta[:, 0] == alpha)
-			i2 = np.where(self.meta[:, 1] == beta)
-			index = list(set(i1[0]).intersection(i2[0]))
-		if alpha != -10000 and beta != -10000 and gamma != -10000:
-			i1 = np.where(self.meta[:, 0] == alpha)
-			i2 = np.where(self.meta[:, 1] == beta)
-			index_ab = list(set(i1[0]).intersection(i2[0]))
-			i3 = np.where(self.meta[:, 2] == gamma)
-			index = list(set(index_ab).intersection(i3[0]))
-		return index
+	# def getIndex(self, alpha, beta, gamma):
+	# 	if alpha != -10000 and beta == -10000:
+	# 		index = np.where(self.meta[:, 0] == alpha)
+	# 	if alpha == -10000 and beta != -10000:
+	# 		index = np.where(self.meta[:, 1] == beta)
+	# 	if alpha != -10000 and beta != -10000 and gamma == -10000:
+	# 		i1 = np.where(self.meta[:, 0] == alpha)
+	# 		i2 = np.where(self.meta[:, 1] == beta)
+	# 		index = list(set(i1[0]).intersection(i2[0]))
+	# 	if alpha != -10000 and beta != -10000 and gamma != -10000:
+	# 		i1 = np.where(self.meta[:, 0] == alpha)
+	# 		i2 = np.where(self.meta[:, 1] == beta)
+	# 		index_ab = list(set(i1[0]).intersection(i2[0]))
+	# 		i3 = np.where(self.meta[:, 2] == gamma)
+	# 		index = list(set(index_ab).intersection(i3[0]))
+	# 	return index
 
 	def getImage(self, index, full):
 		file_with_path = self.path + '/' + self.data_files[index]
@@ -394,7 +398,7 @@ class GetEdfData(object):
 		return np.amin(stack, 2)
 
 	def getMetaValues(self):
-		return self.alphavals, self.betavals, self.gammavals
+		return self.alphavals, self.betavals, self.gammavals, self.thetavals
 
 	def getMetaArray(self):
 		return self.meta
@@ -466,6 +470,7 @@ class GetEdfData(object):
 		else:
 			# all other process send their result
 			self.comm.Send(imgarray_part, dest=0)
+
 
 if __name__ == '__main__':
 	pass
