@@ -4,6 +4,7 @@ import time
 import os
 import warnings
 import numpy as np
+import pdb 	# For debugging
 
 try:
 	from mpi4py import MPI
@@ -52,6 +53,7 @@ class makematrix():
 			int(int(poi[1]) + int(imgsize[1]) / 2)]
 
 		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
+<<<<<<< d0da2f49fba4d23fbd70626e49401f10c87d865b
 		self.alpha, self.beta, self.omega, self.theta = data.getMetaValues()
 
 		self.index_list = range(len(data.meta))
@@ -61,6 +63,23 @@ class makematrix():
 		self.calcTheta(data)
 		# self.calcEtaIndexList(data, eta)
 
+=======
+		self.alpha, self.beta, self.omega = data.getMetaValues() # Redefine
+		min_alpha = min(self.alpha)
+		max_alpha = max(self.alpha)
+		min_beta = min(self.beta)
+		max_beta = max(self.beta)
+		print min_alpha, max_alpha, min_beta, max_beta
+
+		pdb.set_trace()
+
+		print self.alpha
+		print self.beta
+		print self.omega
+		print len(self.alpha)
+		print len(self.beta)
+		print len(self.omega)
+>>>>>>> Binning angular values (irregular motor steps)
 		self.allFiles(data, imgsize)
 
 		if self.rank == 0:
@@ -124,10 +143,18 @@ class makematrix():
 			imgarray = data.makeImgArray(self.index_list, 50, 'linetrace')
 
 		if self.rank == 0:
+<<<<<<< d0da2f49fba4d23fbd70626e49401f10c87d865b
 			# lena = len(self.theta)
 			lena = len(self.thetafake)
 			lenb = len(self.eta)
+=======
+			lena = 7#len(self.alpha)
+			lenb = 7#len(self.beta)
+>>>>>>> Binning angular values (irregular motor steps)
 			leno = len(self.omega)
+			#lena = len(self.alpha)
+			#lenb = len(self.beta)
+			#leno = len(self.omega)
 
 			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
@@ -181,4 +208,4 @@ if __name__ == "__main__":
 			sys.argv[5],
 			sys.argv[6],
 			sys.argv[7],
-			sys.argv[8],)
+			sys.argv[8])
