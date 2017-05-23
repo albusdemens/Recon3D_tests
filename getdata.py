@@ -54,18 +54,14 @@ class makematrix():
 			int(int(poi[1]) + int(imgsize[1]) / 2)]
 
 		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
-<<<<<<< d0da2f49fba4d23fbd70626e49401f10c87d865b
+
 		self.alpha, self.beta, self.omega, self.theta = data.getMetaValues()
 
 		self.index_list = range(len(data.meta))
 		self.meta = data.meta
-
 		self.calcEta(data)
 		self.calcTheta(data)
 		# self.calcEtaIndexList(data, eta)
-
-=======
-		self.alpha, self.beta, self.omega = data.getMetaValues() # Redefine
 
 		# Alpha and beta values were measured at irregular steps. To make things
 		# easy, we bin the values in 7 intervals per variable
@@ -93,13 +89,10 @@ class makematrix():
 		print self.alpha
 		print self.beta
 		print self.omega
-<<<<<<< 939932454d6d654ead2b9aaead398e6d08cce97a
 		print len(self.alpha)
 		print len(self.beta)
 		print len(self.omega)
->>>>>>> Binning angular values (irregular motor steps)
-=======
->>>>>>> Done with data binning
+
 		self.allFiles(data, imgsize)
 
 		if self.rank == 0:
@@ -163,20 +156,14 @@ class makematrix():
 			imgarray = data.makeImgArray(self.index_list, 50, 'linetrace')
 
 		if self.rank == 0:
-<<<<<<< 939932454d6d654ead2b9aaead398e6d08cce97a
-<<<<<<< d0da2f49fba4d23fbd70626e49401f10c87d865b
+
 			# lena = len(self.theta)
 			lena = len(self.thetafake)
 			lenb = len(self.eta)
-=======
-			lena = 7#len(self.alpha)
-			lenb = 7#len(self.beta)
->>>>>>> Binning angular values (irregular motor steps)
-=======
+
 			# If we need to bin the angular values
 			lena = len(alpha_discr)
 			lenb = len(beta_discr)
->>>>>>> Done with data binning
 			leno = len(self.omega)
 
 			# If we don't need to bin the angular values
