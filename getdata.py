@@ -22,6 +22,8 @@ Point of interest
 Image size
 Output path
 Name of new output directory to make
+Initial phi values
+Initial chi value
 '''
 
 
@@ -30,6 +32,7 @@ class makematrix():
 		self, datadir,
 		dataname, bgpath, bgfilename,
 		poi, imgsize, outputpath, outputdir,
+		phi_0, chi_0,
 		sim=False):
 
 		try:
@@ -59,11 +62,13 @@ class makematrix():
 
 		self.index_list = range(len(data.meta))
 		self.meta = data.meta
-		self.calcEta(data)
-		self.calcTheta(data)
 		# self.calcEtaIndexList(data, eta)
 
-		# To reduce data size, 
+		# In the macro for the motors, alpha and beta are functions of omega.
+		# By saving the index used in the calculations, instead that the entire
+		# value, we greately reduce the memory requirements
+
+		print self.omega
 
 		self.allFiles(data, imgsize)
 
@@ -100,12 +105,12 @@ class makematrix():
 			#bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
 			for i, ind in enumerate(self.index_list):
-				a = np.where(self.thetafake == self.thetaindex[ind])  # theta
-				b = np.where(self.eta == self.etaindex[ind])  # roll
+				a = np.where(self.alpha == self.meta[ind,0])  # theta
+				b = np.where(self.beta == self.meta[ind,1])  # roll
 				c = np.where(self.omega == self.meta[ind, 2])  # omega
-				d = np.where(self.theta == met[ind, 4])	# theta
+				d = np.where(self.theta == self.meta[ind, 4])	# theta
 
-				#bigarray[a, b, c, :, :] = imgarray[ind, :, :]
+				#bigarray[a, b, c, d, :, :] = imgarray[ind, :, :]
 
 			np.save(self.directory + '/alpha.npy', self.alpha)
 			np.save(self.directory + '/beta.npy', self.beta)
