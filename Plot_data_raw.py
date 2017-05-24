@@ -2,6 +2,10 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+def randrange(n, vmin, vmax):
+    return (vmax-vmin)*np.random.rand(n) + vmin
 
 Data = np.load('/Users/Alberto/Documents/Data_analysis/DFXRM/Results_sunday/All_data.npy')
 
@@ -9,6 +13,7 @@ Data = np.load('/Users/Alberto/Documents/Data_analysis/DFXRM/Results_sunday/All_
 alpha = Data[:,0]
 beta = Data[:,1]
 omega = Data[:,2]
+theta = Data[:,4]
 
 # Print all rotation angles
 print(np.sort(list(set(omega))))
@@ -24,11 +29,25 @@ print(np.sort(list(set(omega))))
 # Sundaynight values: 1.6, 30.4, 60., 90.4, 120., 150.4, 179.2
 # Monday values: 1.6, 30.4, 60., 89.6, 120., 150.4, 178.4
 # Lower = 1.6 because of strange behaviour at 0.8
-Om = 178.4
+Om = 0.8
 
 idx = np.where(omega==Om)
 alpha_select = alpha[idx]
 beta_select = beta[idx]
+theta_select = theta[idx]
+
+# Plot, in 3D, the (alpha, beta, theta) distribution
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+n = 100
+ax.scatter(alpha_select, beta_select, theta_select, c='g', marker='o')
+
+ax.set_xlabel('Alpha (degrees)')
+ax.set_ylabel('Beta (degrees)')
+ax.set_zlabel('Theta (degrees)')
+
+plt.show()
+
 
 # For the selected omega, plot the angular distribution
 fig = plt.figure(figsize=(12,9))

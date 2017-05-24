@@ -67,8 +67,7 @@ class makematrix():
 		# In the macro for the motors, alpha and beta are functions of omega.
 		# By saving the index used in the calculations, instead that the entire
 		# value, we greately reduce the memory requirements
-
-		print self.omega
+		print self.theta
 
 		self.allFiles(data, imgsize)
 
@@ -107,8 +106,8 @@ class makematrix():
 			for i, ind in enumerate(self.index_list):
 				a = np.where(self.alpha == self.meta[ind,0])  # theta
 				b = np.where(self.beta == self.meta[ind,1])  # roll
-				c = np.where(self.omega == self.meta[ind, 2])  # omega
-				d = np.where(self.theta == self.meta[ind, 4])	# theta
+				c = np.where(self.omega == self.meta[ind,2])  # omega
+				d = np.where(self.theta == self.meta[ind,4])	# theta
 
 				#bigarray[a, b, c, d, :, :] = imgarray[ind, :, :]
 
@@ -116,13 +115,14 @@ class makematrix():
 			np.save(self.directory + '/beta.npy', self.beta)
 			np.save(self.directory + '/theta.npy', self.theta)
 			np.save(self.directory + '/omega.npy', self.omega)
+			np.save(self.directory + '/all_data.npy', self.meta)
 
 			#np.save(self.directory + '/dataarray.npy', bigarray)
 
 
 if __name__ == "__main__":
-	if len(sys.argv) != 9:
-		if len(sys.argv) != 10:
+	if len(sys.argv) != 10:
+		if len(sys.argv) != 11:
 			print "Not enough input parameters. Data input should be:\n\
 	Directory of data\n\
 	Name of data files\n\
@@ -132,6 +132,8 @@ if __name__ == "__main__":
 	Image size\n\
 	Output path\n\
 	Name of new output directory to make\n\
+	Initial phi value\n\
+	Initial chi value\n\
 		"
 		else:
 			mm = makematrix(
@@ -143,7 +145,8 @@ if __name__ == "__main__":
 				sys.argv[6],
 				sys.argv[7],
 				sys.argv[8],
-				sys.argv[9])
+				sys.argv[9],
+				sys.argv[10])
 	else:
 		mm = makematrix(
 			sys.argv[1],
@@ -153,4 +156,6 @@ if __name__ == "__main__":
 			sys.argv[5],
 			sys.argv[6],
 			sys.argv[7],
-			sys.argv[8])
+			sys.argv[8],
+			sys.argv[10],
+			sys.argv[11])
