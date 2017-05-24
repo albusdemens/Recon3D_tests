@@ -48,8 +48,7 @@ ax.set_zlabel('Theta (degrees)')
 
 plt.show()
 
-
-# For the selected omega, plot the angular distribution
+# For a selected omega, plot the angular distribution
 fig = plt.figure(figsize=(12,9))
 
 plt.rc('text', usetex=True)

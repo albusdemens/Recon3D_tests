@@ -62,12 +62,10 @@ class makematrix():
 
 		self.index_list = range(len(data.meta))
 		self.meta = data.meta
-		# self.calcEtaIndexList(data, eta)
+		self.phi = phi_0
+		self.chi = chi_0
 
-		# In the macro for the motors, alpha and beta are functions of omega.
-		# By saving the index used in the calculations, instead that the entire
-		# value, we greately reduce the memory requirements
-		print self.theta
+		# self.calcEtaIndexList(data, eta)
 
 		self.allFiles(data, imgsize)
 
@@ -101,22 +99,36 @@ class makematrix():
 			leno = len(self.omega)
 			lent = len(self.theta)
 
-			#bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
+			# Reduce alpha and beta to a single index_list
+			index_list = np.zeros(len(self.meta))
+			for j in range(len(self.meta)):
+				alp = float(self.meta[j,0])
+				omg = float(self.meta[j,2])
+				phi_0 = float(self.phi)
+				index_list[j] = int((alp - phi_0)/(np.cos(np.deg2rad(omg))*0.032))
+
+			num_int = len(set(index_list))	# Number of considered alpha, beta
+											# intervals
+			idx_values = sorted(set(index_list))	# Values of the indices
+			print idx_values
+
+			print 'Check that the number of (phi, chi) steps is', num_int
+
+			bigarray = np.zeros((num_int, leno, lent, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
 			for i, ind in enumerate(self.index_list):
-				a = np.where(self.alpha == self.meta[ind,0])  # theta
-				b = np.where(self.beta == self.meta[ind,1])  # roll
-				c = np.where(self.omega == self.meta[ind,2])  # omega
+				a = np.where(self.alpha == self.meta[ind,0])  	# rock
+				b = np.where(self.beta == self.meta[ind,1])  	# roll
+				c = np.where(self.omega == self.meta[ind,2])  	# omega
 				d = np.where(self.theta == self.meta[ind,4])	# theta
 
-				#bigarray[a, b, c, d, :, :] = imgarray[ind, :, :]
+				bigarray[idx_values, c, d, :, :] = imgarray[ind, :, :]
 
 			np.save(self.directory + '/alpha.npy', self.alpha)
 			np.save(self.directory + '/beta.npy', self.beta)
 			np.save(self.directory + '/theta.npy', self.theta)
 			np.save(self.directory + '/omega.npy', self.omega)
 			np.save(self.directory + '/all_data.npy', self.meta)
-
 			#np.save(self.directory + '/dataarray.npy', bigarray)
 
 
