@@ -63,35 +63,7 @@ class makematrix():
 		self.calcTheta(data)
 		# self.calcEtaIndexList(data, eta)
 
-		# Alpha and beta values were measured at irregular steps. To make things
-		# easy, we bin the values in 7 intervals per variable
-		[count_alpha, extremes_alpha] = np.histogram(self.alpha, 7)
-		val_alpha = np.zeros(len(extremes_alpha)-1)
-		[count_beta, extremes_beta] = np.histogram(self.beta, 7)
-		val_beta = np.zeros(len(extremes_beta)-1)
-
-		# Find center of each bin
-		for i in range(0,len(extremes_alpha)-1):
-			val_alpha[i] = np.mean([extremes_alpha[i], extremes_alpha[i+1]])
-		for j in range(0,len(extremes_beta)-1):
-			val_beta[j] = np.mean([extremes_beta[j], extremes_beta[j+1]])
-
-		# For each experimental value, find closest bin centre
-		alpha_discr = np.zeros(len(self.alpha))
-		for i in range(0, len(self.alpha)):
-			alpha_discr[i] = find_nearest(val_alpha,self.alpha[i])
-		beta_discr = np.zeros(len(self.beta))
-		for j in range(0, len(self.beta)):
-			beta_discr[j] = find_nearest(val_beta,self.beta[j])
-
-		pdb.set_trace()
-
-		print self.alpha
-		print self.beta
-		print self.omega
-		print len(self.alpha)
-		print len(self.beta)
-		print len(self.omega)
+		# To reduce data size, 
 
 		self.allFiles(data, imgsize)
 
@@ -107,44 +79,6 @@ class makematrix():
 			os.makedirs(directory)
 		return directory
 
-	def calcEta(self, data):
-		for om in self.omega:
-			ind = np.where(self.meta[:, 2] == om)
-			a = self.meta[ind, 0][0]
-
-			eta1 = (a - data.alpha0) / np.cos(np.radians(om))
-			self.eta = np.sort(list(set(eta1)))
-
-		self.etaindex = np.zeros((len(self.index_list)))
-
-		for ind in self.index_list:
-			om = self.meta[ind, 2]
-			a = self.meta[ind, 0] - data.alpha0
-			eta1 = a / np.cos(np.radians(om))
-
-			etapos = np.where(self.eta == min(self.eta, key=lambda x: abs(x-eta1)))[0][0]
-
-			self.etaindex[ind] = self.eta[etapos]
-
-	def calcTheta(self, data):
-		self.thetafake = data.theta0 + np.arange(-3.5 * 0.032, 3.5 * 0.032, 0.032)
-		self.thetaindex = np.zeros((len(self.index_list)))
-		for ind in self.index_list:
-			t = self.meta[ind, 4] - data.theta0
-			thetapos = np.where(self.thetafake == min(self.thetafake, key=lambda x: abs(x-t)))[0][0]
-			self.thetaindex[ind] = self.thetafake[thetapos]
-	# def calcEtaIndexList(self, data, eta):
-	# 	self.etaindex = np.zeros((len(self.index_list)))
-	#
-	# 	for ind in self.index_list:
-	# 		om = self.meta[ind, 2]
-	# 		a = self.meta[ind, 0] - data.alpha0
-	# 		eta1 = a / np.cos(np.radians(om))
-	#
-	# 		etapos = np.where(eta == min(eta, key=lambda x: abs(x-eta1)))[0][0]
-	#
-	# 		self.etaindex[ind] = eta[etapos]
-
 	def allFiles(self, data, imsiz):
 		# index_list = range(len(data.meta))
 		# met = data.meta
@@ -157,37 +91,28 @@ class makematrix():
 
 		if self.rank == 0:
 
-			# lena = len(self.theta)
-			lena = len(self.thetafake)
-			lenb = len(self.eta)
-
-			# If we need to bin the angular values
-			lena = len(alpha_discr)
-			lenb = len(beta_discr)
-			leno = len(self.omega)
-
 			# If we don't need to bin the angular values
-			#lena = len(self.alpha)
-			#lenb = len(self.beta)
-			#leno = len(self.omega)
+			lena = len(self.alpha)
+			lenb = len(self.beta)
+			leno = len(self.omega)
+			lent = len(self.theta)
 
-			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
+			#bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
 			for i, ind in enumerate(self.index_list):
 				a = np.where(self.thetafake == self.thetaindex[ind])  # theta
 				b = np.where(self.eta == self.etaindex[ind])  # roll
 				c = np.where(self.omega == self.meta[ind, 2])  # omega
-				# d = np.where(self.theta == met[ind, 4])
+				d = np.where(self.theta == met[ind, 4])	# theta
 
-				bigarray[a, b, c, :, :] = imgarray[ind, :, :]
+				#bigarray[a, b, c, :, :] = imgarray[ind, :, :]
 
-			# np.save(self.directory + '/alpha.npy', self.alpha)
-			# np.save(self.directory + '/beta.npy', self.beta)
-			np.save(self.directory + '/roll.npy', self.eta)
-			np.save(self.directory + '/theta.npy', self.thetafake)
+			np.save(self.directory + '/alpha.npy', self.alpha)
+			np.save(self.directory + '/beta.npy', self.beta)
+			np.save(self.directory + '/theta.npy', self.theta)
 			np.save(self.directory + '/omega.npy', self.omega)
 
-			np.save(self.directory + '/dataarray.npy', bigarray)
+			#np.save(self.directory + '/dataarray.npy', bigarray)
 
 
 if __name__ == "__main__":

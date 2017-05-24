@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-Data = np.load('/Users/Alberto/Documents/Data_analysis/DFXRM/Results_monday/All_data.npy')
+Data = np.load('/Users/Alberto/Documents/Data_analysis/DFXRM/Results_sunday/All_data.npy')
 
 # Plot distribution of motor values
 alpha = Data[:,0]
