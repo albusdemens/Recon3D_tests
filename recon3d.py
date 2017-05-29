@@ -45,7 +45,7 @@ class main():
 		self.alpha = np.load(self.par['path'] + '/alpha.npy')
 		self.beta = np.load(self.par['path'] + '/beta.npy')
 		self.omega = np.load(self.par['path'] + '/omega.npy')
-		# self.theta = np.load(self.par['path'] + '/theta.npy')
+		self.theta = np.load(self.par['path'] + '/theta.npy')
 
 	def reconstruct_mpi(self):
 		ypix = np.array(self.par['grain_steps'])[2]
@@ -114,7 +114,7 @@ class main():
 
 		detx_size = np.shape(self.fullarray)[3]
 		detz_size = np.shape(self.fullarray)[4]
-		detx_center = (detx_size - 0.) / 2  # should probably be -1 in stead of -0...
+		detx_center = (detx_size - 0.) / 2  # should probably be -1 instead of -0...
 		detz_center = (detz_size - 0.) / 2.  # also here... but simulations used 0
 		lens = len(slow)
 		lenm = len(med)
@@ -214,8 +214,9 @@ class main():
 		lo = np.pi * self.beta / 180.
 		om = np.pi * self.omega / 180.
 		# th = np.pi * self.par['theta'] / 180.
-		th = np.pi * np.array([0]) / 180.
+		th = np.pi * self.theta / 180.
 
+		# Include the axis tilting
 		try:
 			t_xx = np.pi * self.par['t_x'] / 180.
 			t_yy = np.pi * self.par['t_y'] / 180.
@@ -337,10 +338,8 @@ class main():
 		else:
 			print "ERROR: scattering geometry not defined"
 
-		# Let's multiply all the matrices. flipud takes into account the
-		# vertical flip introduced by the lens system
-		T_s2d = self.par['M'] * np.flipud(
-			np.matmul(
+		# Multiply all matrices
+		T_s2d = self.par['M'] * np.matmul(
 				T_det,
 				np.matmul(
 					Tinv_th,
@@ -360,7 +359,7 @@ class main():
 												Tinv_up,
 												np.matmul(
 													R_up,
-													T_up)))))))))))
+													T_up))))))))))
 		return T_s2d
 
 	def outputfiles(self, grain_ang):

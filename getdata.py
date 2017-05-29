@@ -106,6 +106,7 @@ class makematrix():
 				alp = float(self.meta[j,0])
 				omg = float(self.meta[j,2])
 				phi_0 = float(self.phi)
+				chi_0 = float(self.chi)
 				idx_list[j] = int((alp - phi_0)/(np.cos(np.deg2rad(omg))*0.032))
 
 			num_int = len(set(idx_list))	# Number of considered alpha, beta
@@ -116,16 +117,21 @@ class makematrix():
 
 			bigarray = np.zeros((num_int, leno, lent, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
-			#for i, ind in enumerate(self.index_list):
-			for ind in range(11,230):
+			#AA = np.empty([len(self.index_list), 5])
+			for i, ind in enumerate(self.index_list):
 				a = np.where(self.alpha == self.meta[int(ind),0])  	# rock
 				b = np.where(self.beta == self.meta[int(ind),1])  	# roll
 				c = np.where(self.omega == self.meta[int(ind),2])  	# omega
 				d = np.where(self.theta == self.meta[int(ind),4])	# theta
-				idx_rescaled = int((self.meta[int(ind),0] - phi_0)/(np.cos(np.deg2rad(self.meta[int(ind),2]))*0.032))+3
-				#print idx_rescaled, self.meta[int(ind),4]
-				#print self.meta[int(ind),0], self.meta[int(ind),1], self.meta[int(ind),2], self.meta[int(ind),4]
-				bigarray[idx_rescaled, c, d, :, :] = imgarray[ind, :, :]
+				idx_rescaled = int((self.meta[int(ind),0] - phi_0)/(np.cos(np.deg2rad(self.meta[int(ind),2]))*0.032)+3)
+
+				# Can we effectively reconstruct chi and phi from idx_rescaled?
+				#ph = phi_0 + ((idx_rescaled - 3)*np.cos(np.deg2rad(self.meta[int(ind),2]))*0.032)
+				#ch = chi_0 + ((idx_rescaled - 3)*(np.tan(np.deg2rad(self.meta[int(ind),2]))*0.032))
+
+				#AA[ind] = [self.meta[int(ind),0], self.meta[int(ind),1],self.meta[int(ind),2], idx_rescaled, self.meta[int(ind),4]]
+
+				bigarray[idx_rescaled, c[0], d[0], :, :] = imgarray[ind, :, :]
 
 			np.save(self.directory + '/alpha.npy', self.alpha)
 			np.save(self.directory + '/beta.npy', self.beta)
@@ -133,6 +139,7 @@ class makematrix():
 			np.save(self.directory + '/omega.npy', self.omega)
 			np.save(self.directory + '/all_data.npy', self.meta)
 			np.save(self.directory + '/dataarray.npy', bigarray)
+			#np.savetxt(self.directory + '/AA.txt', AA)
 
 
 if __name__ == "__main__":
