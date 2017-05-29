@@ -213,7 +213,6 @@ class main():
 		up = np.pi * self.alpha / 180.
 		lo = np.pi * self.beta / 180.
 		om = np.pi * self.omega / 180.
-		# th = np.pi * self.par['theta'] / 180.
 		th = np.pi * self.theta / 180.
 
 		# Include the axis tilting

@@ -115,7 +115,7 @@ class makematrix():
 
 			print 'Check that the number of (phi, chi) steps is', num_int
 
-			bigarray = np.zeros((num_int, leno, lent, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
+			bigarray = np.zeros((num_int, lent, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
 			#AA = np.empty([len(self.index_list), 5])
 			for i, ind in enumerate(self.index_list):
@@ -131,7 +131,7 @@ class makematrix():
 
 				#AA[ind] = [self.meta[int(ind),0], self.meta[int(ind),1],self.meta[int(ind),2], idx_rescaled, self.meta[int(ind),4]]
 
-				bigarray[idx_rescaled, c[0], d[0], :, :] = imgarray[ind, :, :]
+				bigarray[idx_rescaled, d[0], c[0], :, :] = imgarray[ind, :, :]
 
 			np.save(self.directory + '/alpha.npy', self.alpha)
 			np.save(self.directory + '/beta.npy', self.beta)
