@@ -123,7 +123,8 @@ class makematrix():
 				b = np.where(self.beta == self.meta[int(ind),1])  	# roll
 				c = np.where(self.omega == self.meta[int(ind),2])  	# omega
 				d = np.where(self.theta == self.meta[int(ind),4])	# theta
-				idx_rescaled = int((self.meta[int(ind),0] - phi_0)/(np.cos(np.deg2rad(self.meta[int(ind),2]))*0.032)+3)
+				idx_rescaled = int((self.meta[int(ind),0] - phi_0) / (np.cos(np.deg2rad(self.meta[int(ind),2])) * 0.032) + ((num_int - 1) / 2))
+				e = (idx_rescaled - ((num_int - 1) / 2)) * 0.032
 
 				# Can we effectively reconstruct chi and phi from idx_rescaled?
 				#ph = phi_0 + ((idx_rescaled - 3)*np.cos(np.deg2rad(self.meta[int(ind),2]))*0.032)
@@ -137,6 +138,8 @@ class makematrix():
 			np.save(self.directory + '/beta.npy', self.beta)
 			np.save(self.directory + '/theta.npy', self.theta)
 			np.save(self.directory + '/omega.npy', self.omega)
+			np.save(self.directory + '/gamma.npy', [((b - ((num_int - 1)/2))*0.032) for b in range(num_int)])
+			# The angle gamma is a linear combination of alpha and beta
 			np.save(self.directory + '/all_data.npy', self.meta)
 			np.save(self.directory + '/dataarray.npy', bigarray)
 			#np.savetxt(self.directory + '/AA.txt', AA)
