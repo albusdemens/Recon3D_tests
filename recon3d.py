@@ -44,8 +44,9 @@ class main():
 		self.fullarray = np.load(self.par['path'] + '/dataarray.npy')
 		self.alpha = np.load(self.par['path'] + '/alpha.npy')
 		self.beta = np.load(self.par['path'] + '/beta.npy')
-		self.omega = np.load(self.par['path'] + '/omega.npy')
+		self.gamma = np.load(self.par['path'] + '/gamma.npy')
 		self.theta = np.load(self.par['path'] + '/theta.npy')
+		self.omega = np.load(self.par['path'] + '/omega.npy')
 
 	def reconstruct_mpi(self):
 		ypix = np.array(self.par['grain_steps'])[2]
@@ -99,9 +100,11 @@ class main():
 		NB AS OF PRESENT THETA IS A NUMBER, NOT AN ARRAY. TO ALLOW FOR AN ARRAY
 		NEED TO THINK ABOUT THE LOOPING AND THE DIMENSIONS OF prop.
 		"""
-		slow = self.alpha
-		med = self.beta
-		fast = self.omega
+		#slow = self.alpha
+		#med = self.beta
+		a1 = self.theta
+		a2 = self.gamma
+		a3 = self.omega
 
 		grain_steps = self.par['grain_steps']
 		grain_dim = np.array(self.par['grain_dim'])
@@ -116,14 +119,23 @@ class main():
 		detz_size = np.shape(self.fullarray)[4]
 		detx_center = (detx_size - 0.) / 2  # should probably be -1 instead of -0...
 		detz_center = (detz_size - 0.) / 2.  # also here... but simulations used 0
-		lens = len(slow)
-		lenm = len(med)
-		lenf = len(fast)
-		mas = max(slow)
-		mis = min(slow)
-		mam = max(med)
-		mim = min(med)
-		prop = np.zeros((lens, lenm, lenf))
+		#lens = len(slow)
+		#lenm = len(med)
+		len_a1 = len(a1)
+		len_a2 = len(a2)
+		len_a3 = len(a3)
+		ma1 = max(a1)
+		mi1 = min(a1)
+		ma2 = max(a2)
+		mi2 = min(a2)
+		ma3 = max(a3)
+		mi3 = min(a3)
+		#mas = max(slow)
+		#mis = min(slow)
+		#mam = max(med)
+		#mim = min(med)
+		prop = np.zeros((len_a1, len_a2))
+		#prop = np.zeros((lens, lenm, lenf))
 
 		t_x = "None"
 		if self.rank == 0:
@@ -164,7 +176,8 @@ class main():
 					detz_f[detz_f < 0] = 0
 					detz_f[detz_f >= detz_size] = detz_size - 1
 
-					prop = self.fullarray[:, :, range(lenf), detx_f, detz_f]
+					#prop = self.fullarray[:, :, range(lenf), detx_f, detz_f]
+					prop = self.fullarray[:, :, range(len_a3), detx_f, detz_f]
 
 					cos = list(ndimage.measurements.center_of_mass(np.sum(prop, 2)))
 
@@ -176,8 +189,8 @@ class main():
 					except IndexError:
 						pass
 
-					cos[0] = cos[0] * (mas - mis) / lens + mis
-					cos[1] = cos[1] * (mam - mim) / lenm + mim
+					cos[0] = cos[0] * (ma1 - mi1) / len1 + mi1
+					cos[1] = cos[1] * (ma2 - mi2) / len2 + mi2
 
 					grain_ang[ix, iy, iz, :2] = cos
 
@@ -210,10 +223,11 @@ class main():
 		point on the rotation axis, eg yxz_up=[-40,0,0] in horizontal geometry.
 		"""
 
-		up = np.pi * self.alpha / 180.
-		lo = np.pi * self.beta / 180.
+		#up = np.pi * self.alpha / 180.
+		#lo = np.pi * self.beta / 180.
 		om = np.pi * self.omega / 180.
 		th = np.pi * self.theta / 180.
+		ga = np.pi * self.gamma / 180.
 
 		# Include the axis tilting
 		try:
@@ -226,112 +240,125 @@ class main():
 			self.par['t_x'] = "None"
 			self.par['t_z'] = "None"
 
-		th_mat, om_mat, lo_mat, up_mat = np.meshgrid(th, om, lo, up, indexing='ij')
+		th_mat, om_mat, ga_mat = np.meshgrid(th, om, ga, indexing='ij')
 
-		R_up = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		R_lo = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		Omega = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		Theta = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		T_det = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		T_up = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		T_lo = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		T_th = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		Tinv_up = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		Tinv_lo = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
-		Tinv_th = np.zeros((len(th), len(om), len(lo), len(up), 4, 4))
+		R_ga = np.zeros((len(th), len(om), len(ga), 4, 4))
+		Omega = np.zeros((len(th), len(om), len(ga), 4, 4))
+		Theta = np.zeros((len(th), len(om), len(ga), 4, 4))
+		T_det = np.zeros((len(th), len(om), len(ga), 4, 4))
+		T_ga = np.zeros((len(th), len(om), len(ga), 4, 4))
+		T_th = np.zeros((len(th), len(om), len(ga), 4, 4))
+		Tinv_ga = np.zeros((len(th), len(om), len(ga), 4, 4))
+		Tinv_th = np.zeros((len(th), len(om), len(ga), 4, 4))
 
 		# The default detector tilt is the unit matrix, i.e. an ideal detector
 		# positioned perpendicular to the diffracted beam (t_x=t=y=t_z=None).
 		# This can be changed by supplying tilts t_x (vertical) or t_z (horizontal).
-		T_det[:, :, :, :, 0, 0] = -1.
+		T_det[:, :, :, 0, 0] = -1.
 		# T_det[:, :, :, :, 1, 1] = 1. #leaving T_det[:, :, :, :, 1, 1]=0
 		# gives the projection onto the detector plane
-		T_det[:, :, :, :, 2, 2] = -1.
-		T_det[:, :, :, :, 3, 3] = 1.
+		T_det[:, :, :, 2, 2] = -1.
+		T_det[:, :, :, 3, 3] = 1.
 
 		# print self.par['xyz_up']
 		# 4x4 according
 		# to http://inside.mines.edu/fs_home/gmurray/ArbitraryAxisRotation/
-		T_up[:, :, :, :, 0:3, 3] = -np.array(self.par['xyz_up'])
-		T_up[:, :, :, :, 0, 0] = 1.
-		T_up[:, :, :, :, 1, 1] = 1.
-		T_up[:, :, :, :, 2, 2] = 1.
-		T_up[:, :, :, :, 3, 3] = 1.
-		Tinv_up[:, :, :, :, 0:3, 3] = np.array(self.par['xyz_up'])
-		Tinv_up[:, :, :, :, 0, 0] = 1.
-		Tinv_up[:, :, :, :, 1, 1] = 1.
-		Tinv_up[:, :, :, :, 2, 2] = 1.
-		Tinv_up[:, :, :, :, 3, 3] = 1.
-		T_lo[:, :, :, :, 0:3, 3] = -np.array(self.par['xyz_lo'])
-		T_lo[:, :, :, :, 0, 0] = 1.
-		T_lo[:, :, :, :, 1, 1] = 1.
-		T_lo[:, :, :, :, 2, 2] = 1.
-		T_lo[:, :, :, :, 3, 3] = 1.
-		Tinv_lo[:, :, :, :, 0:3, 3] = np.array(self.par['xyz_lo'])
-		Tinv_lo[:, :, :, :, 0, 0] = 1.
-		Tinv_lo[:, :, :, :, 1, 1] = 1.
-		Tinv_lo[:, :, :, :, 2, 2] = 1.
-		Tinv_lo[:, :, :, :, 3, 3] = 1.
-		T_th[:, :, :, :, 0:3, 3] = -np.array(self.par['xyz_th'])
-		T_th[:, :, :, :, 0, 0] = 1.
-		T_th[:, :, :, :, 1, 1] = 1.
-		T_th[:, :, :, :, 2, 2] = 1.
-		T_th[:, :, :, :, 3, 3] = 1.
-		Tinv_th[:, :, :, :, 0:3, 3] = np.array(self.par['xyz_th'])
-		Tinv_th[:, :, :, :, 0, 0] = 1.
-		Tinv_th[:, :, :, :, 1, 1] = 1.
-		Tinv_th[:, :, :, :, 2, 2] = 1.
-		Tinv_th[:, :, :, :, 3, 3] = 1.
+		# T_up[:, :, :, :, 0:3, 3] = -np.array(self.par['xyz_up'])
+		#T_up[:, :, :, :, 0, 0] = 1.
+		#T_up[:, :, :, :, 1, 1] = 1.
+		#T_up[:, :, :, :, 2, 2] = 1.
+		#T_up[:, :, :, :, 3, 3] = 1.
+		#Tinv_up[:, :, :, :, 0:3, 3] = np.array(self.par['xyz_up'])
+		#Tinv_up[:, :, :, :, 0, 0] = 1.
+		#Tinv_up[:, :, :, :, 1, 1] = 1.
+		#Tinv_up[:, :, :, :, 2, 2] = 1.
+		#Tinv_up[:, :, :, :, 3, 3] = 1.
+		#T_lo[:, :, :, :, 0:3, 3] = -np.array(self.par['xyz_lo'])
+		#T_lo[:, :, :, :, 0, 0] = 1.
+		#T_lo[:, :, :, :, 1, 1] = 1.
+		#T_lo[:, :, :, :, 2, 2] = 1.
+		#T_lo[:, :, :, :, 3, 3] = 1.
+		#Tinv_lo[:, :, :, :, 0:3, 3] = np.array(self.par['xyz_lo'])
+		#Tinv_lo[:, :, :, :, 0, 0] = 1.
+		#Tinv_lo[:, :, :, :, 1, 1] = 1.
+		#Tinv_lo[:, :, :, :, 2, 2] = 1.
+		#Tinv_lo[:, :, :, :, 3, 3] = 1.
+		T_ga[:, :, :, 0:3, 3] = -np.array(self.par['xyz_th'])
+		T_ga[:, :, :, 0, 0] = 1.
+		T_ga[:, :, :, 1, 1] = 1.
+		T_ga[:, :, :, 2, 2] = 1.
+		T_ga[:, :, :, 3, 3] = 1.
+		Tinv_ga[:, :, :, 0:3, 3] = np.array(self.par['xyz_th'])
+		Tinv_ga[:, :, :, 0, 0] = 1.
+		Tinv_ga[:, :, :, 1, 1] = 1.
+		Tinv_ga[:, :, :, 2, 2] = 1.
+		Tinv_ga[:, :, :, 3, 3] = 1.
+		T_th[:, :, :, 0:3, 3] = -np.array(self.par['xyz_th'])
+		T_th[:, :, :, 0, 0] = 1.
+		T_th[:, :, :, 1, 1] = 1.
+		T_th[:, :, :, 2, 2] = 1.
+		T_th[:, :, :, 3, 3] = 1.
+		Tinv_th[:, :, :, 0:3, 3] = np.array(self.par['xyz_th'])
+		Tinv_th[:, :, :, 0, 0] = 1.
+		Tinv_th[:, :, :, 1, 1] = 1.
+		Tinv_th[:, :, :, 2, 2] = 1.
+		Tinv_th[:, :, :, 3, 3] = 1.
 
 		if self.par['mode'] == "horizontal":
-			Theta[:, :, :, :, 0, 0] = np.cos(th_mat)
-			Theta[:, :, :, :, 0, 1] = -np.sin(th_mat)
-			Theta[:, :, :, :, 1, 0] = np.sin(th_mat)
-			Theta[:, :, :, :, 1, 1] = np.cos(th_mat)
-			Theta[:, :, :, :, 2, 2] = 1.
-			Theta[:, :, :, :, 3, 3] = 1.
-			Omega[:, :, :, :, 0, 0] = 1.
-			Omega[:, :, :, :, 1, 1] = np.cos(om_mat)
-			Omega[:, :, :, :, 1, 2] = -np.sin(om_mat)
-			Omega[:, :, :, :, 2, 1] = np.sin(om_mat)
-			Omega[:, :, :, :, 2, 2] = np.cos(om_mat)
-			Omega[:, :, :, :, 3, 3] = 1.
-			R_lo[:, :, :, :, 0, 0] = np.cos(lo_mat)
-			R_lo[:, :, :, :, 0, 2] = np.sin(lo_mat)
-			R_lo[:, :, :, :, 1, 1] = 1.
-			R_lo[:, :, :, :, 2, 0] = -np.sin(lo_mat)
-			R_lo[:, :, :, :, 2, 2] = np.cos(lo_mat)
-			R_lo[:, :, :, :, 3, 3] = 1.
-			R_up[:, :, :, :, 0, 0] = np.cos(up_mat)
-			R_up[:, :, :, :, 0, 1] = -np.sin(up_mat)
-			R_up[:, :, :, :, 1, 0] = np.sin(up_mat)
-			R_up[:, :, :, :, 1, 1] = np.cos(up_mat)
-			R_up[:, :, :, :, 2, 2] = 1.
-			R_up[:, :, :, :, 3, 3] = 1.
+			Theta[:, :, :, 0, 0] = np.cos(th_mat)
+			Theta[:, :, :, 0, 1] = -np.sin(th_mat)
+			Theta[:, :, :, 1, 0] = np.sin(th_mat)
+			Theta[:, :, :, 1, 1] = np.cos(th_mat)
+			Theta[:, :, :, 2, 2] = 1.
+			Theta[:, :, :, 3, 3] = 1.
+			Omega[:, :, :, 0, 0] = 1.
+			Omega[:, :, :, 1, 1] = np.cos(om_mat)
+			Omega[:, :, :, 1, 2] = -np.sin(om_mat)
+			Omega[:, :, :, 2, 1] = np.sin(om_mat)
+			Omega[:, :, :, 2, 2] = np.cos(om_mat)
+			Omega[:, :, :, 3, 3] = 1.
+			#R_lo[:, :, :, :, 0, 0] = np.cos(lo_mat)
+			#R_lo[:, :, :, :, 0, 2] = np.sin(lo_mat)
+			#R_lo[:, :, :, :, 1, 1] = 1.
+			#R_lo[:, :, :, :, 2, 0] = -np.sin(lo_mat)
+			#R_lo[:, :, :, :, 2, 2] = np.cos(lo_mat)
+			#R_lo[:, :, :, :, 3, 3] = 1.
+			#R_up[:, :, :, :, 0, 0] = np.cos(up_mat)
+			#R_up[:, :, :, :, 0, 1] = -np.sin(up_mat)
+			#R_up[:, :, :, :, 1, 0] = np.sin(up_mat)
+			#R_up[:, :, :, :, 1, 1] = np.cos(up_mat)
+			#R_up[:, :, :, :, 2, 2] = 1.
+			#R_up[:, :, :, :, 3, 3] = 1.
+			R_ga[:, :, :, 0, 0] = np.cos(ga_mat)
+			R_ga[:, :, :, 0, 2] = np.sin(ga_mat)
+			R_ga[:, :, :, 1, 1] = 1.
+			R_ga[:, :, :, 2, 0] = -np.sin(ga_mat)
+			R_ga[:, :, :, 2, 2] = np.cos(ga_mat)
+			R_ga[:, :, :, 3, 3] = 1.
 			if self.par['t_z'] != "None":
 				T_det[:, :, :, :, 0, 0] = -1. / np.cos(t_zz - 2 * np.mean(th))
 		elif self.par['mode'] == "vertical":
-			Theta[:, :, :, :, 0, 0] = 1.
-			Theta[:, :, :, :, 1, 1] = np.cos(th_mat)
-			Theta[:, :, :, :, 1, 2] = -np.sin(th_mat)
-			Theta[:, :, :, :, 2, 1] = np.sin(th_mat)
-			Theta[:, :, :, :, 2, 2] = np.cos(th_mat)
-			Theta[:, :, :, :, 3, 3] = 1.
-			Omega[:, :, :, :, 0, 0] = np.cos(om_mat)
-			Omega[:, :, :, :, 0, 1] = -np.sin(om_mat)
-			Omega[:, :, :, :, 1, 0] = np.sin(om_mat)
-			Omega[:, :, :, :, 1, 1] = np.cos(om_mat)
-			Omega[:, :, :, :, 2, 2] = 1.
-			Omega[:, :, :, :, 3, 3] = 1.
+			Theta[:, :, :, 0, 0] = 1.
+			Theta[:, :, :, 1, 1] = np.cos(th_mat)
+			Theta[:, :, :, 1, 2] = -np.sin(th_mat)
+			Theta[:, :, :, 2, 1] = np.sin(th_mat)
+			Theta[:, :, :, 2, 2] = np.cos(th_mat)
+			Theta[:, :, :, 3, 3] = 1.
+			Omega[:, :, :, 0, 0] = np.cos(om_mat)
+			Omega[:, :, :, 0, 1] = -np.sin(om_mat)
+			Omega[:, :, :, 1, 0] = np.sin(om_mat)
+			Omega[:, :, :, 1, 1] = np.cos(om_mat)
+			Omega[:, :, :, 2, 2] = 1.
+			Omega[:, :, :, 3, 3] = 1.
 			# NB Should define around which axes the upper and lower rotation belong
-			R_lo[:, :, :, :, 0, 0] = 1.
-			R_lo[:, :, :, :, 1, 1] = 1.
-			R_lo[:, :, :, :, 2, 2] = 1.
-			R_lo[:, :, :, :, 3, 3] = 1.
-			R_up[:, :, :, :, 0, 0] = 1.
-			R_up[:, :, :, :, 1, 1] = 1.
-			R_up[:, :, :, :, 2, 2] = 1.
-			R_up[:, :, :, :, 3, 3] = 1.
+			R_lo[:, :, :, 0, 0] = 1.
+			R_lo[:, :, :, 1, 1] = 1.
+			R_lo[:, :, :, 2, 2] = 1.
+			R_lo[:, :, :, 3, 3] = 1.
+			R_up[:, :, :, 0, 0] = 1.
+			R_up[:, :, :, 1, 1] = 1.
+			R_up[:, :, :, 2, 2] = 1.
+			R_up[:, :, :, 3, 3] = 1.
 			if self.par['t_x'] != "None":
 				T_det[:, :, :, :, 2, 2] = -1. / np.cos(t_xx - 2 * np.mean(th))
 		else:
@@ -347,18 +374,27 @@ class main():
 						np.matmul(
 							T_th,
 							np.matmul(
-								Omega,
+								Tinv_ga,
 								np.matmul(
-									Tinv_lo,
+									R_ga,
 									np.matmul(
-										R_lo,
+										T_ga,
 										np.matmul(
-											T_lo,
-											np.matmul(
-												Tinv_up,
-												np.matmul(
-													R_up,
-													T_up))))))))))
+											Omega))))))))
+
+
+							#	Omega,
+							#	np.matmul(
+							#		Tinv_lo,
+							#		np.matmul(
+							#			R_lo,
+							#			np.matmul(
+							#				T_lo,
+							#				np.matmul(
+							#					Tinv_up,
+							#					np.matmul(
+							#						R_up,
+							#						T_up))))))))))
 		return T_s2d
 
 	def outputfiles(self, grain_ang):

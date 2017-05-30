@@ -139,7 +139,7 @@ class makematrix():
 			np.save(self.directory + '/theta.npy', self.theta)
 			np.save(self.directory + '/omega.npy', self.omega)
 			np.save(self.directory + '/gamma.npy', [((b - ((num_int - 1)/2))*0.032) for b in range(num_int)])
-			# The angle gamma is a linear combination of alpha and beta
+			# The gamma angle is a linear combination of alpha and beta
 			np.save(self.directory + '/all_data.npy', self.meta)
 			np.save(self.directory + '/dataarray.npy', bigarray)
 			#np.savetxt(self.directory + '/AA.txt', AA)
