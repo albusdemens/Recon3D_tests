@@ -15,4 +15,4 @@ plt.close("all")
 dir = sys.argv[1]
 Data = np.load(os.path.join(dir,'grain_ang.npy'))
 
-print Data
+print Data, np.min(Data)

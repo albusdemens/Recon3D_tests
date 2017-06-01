@@ -165,13 +165,14 @@ class main():
 					blah[:3] = grain_xyz[ix, iy, iz]
 					blah[3] = 1.
 
-					xyz_d_f = np.matmul(T_s2d[0, :, 0, 0], blah)  # , grain_xyz[ix, iy, iz])
+					xyz_d_f = np.matmul(T_s2d[0, :, 0], blah)  # , grain_xyz[ix, iy, iz])
 
 					detx_f = np.rint(xyz_d_f[:, 0] + detx_center).astype(int)
 					detz_f = np.rint(xyz_d_f[:, 2] + detz_center).astype(int)
 					# projections outside detector frame hit the outmost row or column
 					# should be OK assuming that the signal doesn't reach the very borders
 					detx_f[detx_f < 0] = 0
+
 					detx_f[detx_f >= detx_size] = detx_size - 1
 					detz_f[detz_f < 0] = 0
 					detz_f[detz_f >= detz_size] = detz_size - 1
@@ -189,8 +190,8 @@ class main():
 					except IndexError:
 						pass
 
-					cos[0] = cos[0] * (ma1 - mi1) / len1 + mi1
-					cos[1] = cos[1] * (ma2 - mi2) / len2 + mi2
+					cos[0] = cos[0] * (ma1 - mi1) / len_a1 + mi1
+					cos[1] = cos[1] * (ma2 - mi2) / len_a2 + mi2
 
 					grain_ang[ix, iy, iz, :2] = cos
 
@@ -336,7 +337,7 @@ class main():
 			R_ga[:, :, :, 2, 2] = np.cos(ga_mat)
 			R_ga[:, :, :, 3, 3] = 1.
 			if self.par['t_z'] != "None":
-				T_det[:, :, :, :, 0, 0] = -1. / np.cos(t_zz - 2 * np.mean(th))
+				T_det[:, :, :, 0, 0] = -1. / np.cos(t_zz - 2 * np.mean(th))
 		elif self.par['mode'] == "vertical":
 			Theta[:, :, :, 0, 0] = 1.
 			Theta[:, :, :, 1, 1] = np.cos(th_mat)
@@ -360,7 +361,7 @@ class main():
 			R_up[:, :, :, 2, 2] = 1.
 			R_up[:, :, :, 3, 3] = 1.
 			if self.par['t_x'] != "None":
-				T_det[:, :, :, :, 2, 2] = -1. / np.cos(t_xx - 2 * np.mean(th))
+				T_det[:, :, :, 2, 2] = -1. / np.cos(t_xx - 2 * np.mean(th))
 		else:
 			print "ERROR: scattering geometry not defined"
 
@@ -379,8 +380,7 @@ class main():
 									R_ga,
 									np.matmul(
 										T_ga,
-										np.matmul(
-											Omega))))))))
+										Omega)))))))
 
 
 							#	Omega,
