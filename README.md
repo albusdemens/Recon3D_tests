@@ -41,7 +41,7 @@ Arguments are the following:
 | phi_0     | Initial phi (alpha) value | 0.765 |
 | chi_0     | Initial chi (beta) value | -3.35 |
 
-If MPI is available, the following command will run the script in 10 processes at the same time. This will vastly increase the speed.
+If MPI is available, the following command will run the script in 10 processes at the same time. This will vastly increase the speed. On Panda2, the recommended maximum number of getdata processes to run in parallel is 20.
 
 ```
 $ mpirun -n 10 python getdata.py [datadir] [dataname] [bgdir] [bgname] [poi] [imgsize] [outputpath] [outputdirname] [phi_0] [chi_0]
