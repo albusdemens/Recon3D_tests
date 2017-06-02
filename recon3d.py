@@ -190,12 +190,10 @@ class main():
 					except IndexError:
 						pass
 
-					cos[0] = cos[0] * (ma1 - mi1) / len_a1 + mi1
-					cos[1] = cos[1] * (ma2 - mi2) / len_a2 + mi2
+					cos[0] = cos[0] * (ma2 - mi2) / len_a2
+					cos[1] = cos[1] * (ma1 - mi1) / len_a1
 
 					grain_ang[ix, iy, iz, :2] = cos
-
-					# print grain_ang[ix, iy, iz, 2]
 
 					if self.rank == 0:
 						t_8 = time.clock()
