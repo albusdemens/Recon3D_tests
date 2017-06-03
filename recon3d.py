@@ -1,6 +1,6 @@
 from check_input import read as ini
 import sys
-import time
+import time, os
 import numpy as np
 from scipy import ndimage
 
