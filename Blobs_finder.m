@@ -1,9 +1,17 @@
-function blobs_layer = Blobs_finder(npy_array, mean_value, z_value)
+function blobs_layer = Blobs_finder(npy_array, mean_value, z_value, idx_tgw)
 % This function returns, for each Z value of an npy array, the regions that
 % should be associated with the shape of a grain
+% npy_array from recon3d.py
+% mean_value is the max(mean) of the weight, calculated for each layer
+% z_value is considered layer
+% idx_wtg is the voxel index to consider. 1: theta, 2: gamma, 3: weight
 
 % Play with a single slice
-B = (npy_array(:, :, z_value, 3)/mean_value);
+if idx_tgw == 3
+    B = (npy_array(:, :, z_value, idx_tgw)/mean_value);
+elseif idx_tgw == 1
+    B = npy_array(:, :, z_value, idx_tgw);
+end
 D = (imregionalmin(B,8));     % Find local minima
 Min_matrix = zeros(size(B));
 
