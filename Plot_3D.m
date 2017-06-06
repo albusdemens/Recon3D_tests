@@ -19,12 +19,18 @@ for i = 1:size(A,3)
     A_final_w(:,:,i) = Layer_w(:,:);
 end
 
+output_w = sprintf('weight_3D.vtk');
+savevtk(A_final_w, output_w);
+
 A_final_t = zeros(size(A));
 for i = 1:size(A,3)
     fprintf('Analyzing level %03i\n', i);
     [Layer_t] = Blobs_finder(A, max_mean, i, 1);
     A_final_t(:,:,i) = Layer_t(:,:);
 end
+
+output_t = sprintf('theta_3D.vtk');
+savevtk(A_final_t, output_t);
 
 A_final_g = zeros(size(A));
 for i = 1:size(A,3)
@@ -37,16 +43,13 @@ for i = 1:size(A,3)
     end
 end
 
+output_g = sprintf('gamma_3D.vtk');
+savevtk(A_final_g, output_g);
+
 A_comb = zeros(size(A));
 for i = 1:size(A,3)
     A_comb(:,:,i) = A_final_w(:,:,i)*10*(A_final_t(:,:,i) + A_final_g(:,:,i));
 end
 
-output_t = sprintf('theta_3D.vtk');
-savevtk(A_final_t, output_t);
-output_g = sprintf('gamma_3D.vtk');
-savevtk(A_final_g, output_g);
-output_w = sprintf('weight_3D.vtk');
-savevtk(A_final_w, output_w);
 output_comb = sprintf('comb_3D.vtk');
 savevtk(A_comb, output_comb);

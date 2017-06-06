@@ -5,7 +5,7 @@ import math
 from itertools import count
 import sys
 
-A = np.load('/Users/Alberto/Documents/Data_analysis/DFXRM/Results_sunday/grain_ang.npy')
+A = np.load('/Users/Alberto/Documents/Data_analysis/DFXRM/Results_sunday/grain_ang_1.npy')
 
 # Find the max of the mean for the weight
 M = np.zeros(A.shape[2])

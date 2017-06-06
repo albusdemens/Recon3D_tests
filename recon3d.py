@@ -3,6 +3,7 @@ import sys
 import time, os
 import numpy as np
 from scipy import ndimage
+import matplotlib.pyplot as plt
 
 try:
 	from mpi4py import MPI
@@ -397,7 +398,7 @@ class main():
 
 	def outputfiles(self, grain_ang):
 		print "Saving grain_ang file..."
-		np.save(self.par['path'] + '/grain_ang.npy', grain_ang)
+		np.save(self.par['path'] + '/grain_ang_1.npy', grain_ang)
 
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
