@@ -22,6 +22,8 @@ Point of interest
 Image size
 Output path
 Name of new output directory to make
+Initial phi values
+Initial chi value
 '''
 
 
@@ -30,6 +32,7 @@ class makematrix():
 		self, datadir,
 		dataname, bgpath, bgfilename,
 		poi, imgsize, outputpath, outputdir,
+		phi_0, chi_0,
 		sim=False):
 
 		try:
@@ -54,28 +57,15 @@ class makematrix():
 			int(int(poi[1]) + int(imgsize[1]) / 2)]
 
 		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
-		self.alpha, self.beta, self.omega = data.getMetaValues() # Redefine
 
-		# Alpha and beta values were measured at irregular steps. To make things
-		# easy, we bin the values in 7 intervals per variable
-		[count_alpha, extremes_alpha] = np.histogram(self.alpha, 7)
-		self.val_alpha = np.zeros(len(extremes_alpha)-1)
-		[count_beta, extremes_beta] = np.histogram(self.beta, 7)
-		self.val_beta = np.zeros(len(extremes_beta)-1)
+		self.alpha, self.beta, self.omega, self.theta = data.getMetaValues()
 
-		# Find center of each bin
-		for i in range(0,len(extremes_alpha)-1):
-			self.val_alpha[i] = np.mean([extremes_alpha[i], extremes_alpha[i+1]])
-		for j in range(0,len(extremes_beta)-1):
-			self.val_beta[j] = np.mean([extremes_beta[j], extremes_beta[j+1]])
+		self.index_list = range(len(data.meta))
+		self.meta = data.meta
+		self.phi = phi_0
+		self.chi = chi_0
 
-		# For each experimental value, find closest bin centre
-		self.alpha_discr = np.zeros(len(self.alpha))
-		for i in range(0, len(self.alpha)):
-			self.alpha_discr[i] = find_nearest(self.val_alpha,self.alpha[i])
-		self.beta_discr = np.zeros(len(self.beta))
-		for j in range(0, len(self.beta)):
-			self.beta_discr[j] = find_nearest(self.val_beta,self.beta[j])
+		# self.calcEtaIndexList(data, eta)
 
 		self.allFiles(data, imgsize)
 
@@ -92,47 +82,72 @@ class makematrix():
 		return directory
 
 	def allFiles(self, data, imsiz):
-		index_list = range(len(data.meta))
-		met = data.meta
+		# index_list = range(len(data.meta))
+		# met = data.meta
+
+		# theta = data.theta0 + np.arange(-3.5 * 0.032, 3.5 * 0.032, 0.032)
 
 		with warnings.catch_warnings():
 			warnings.simplefilter("ignore")
-			imgarray = data.makeImgArray(index_list, 50, 'linetrace')
+			imgarray = data.makeImgArray(self.index_list, 50, 'linetrace')
 
 		if self.rank == 0:
-			# If we need to bin the angular values
-			lena = len(self.val_alpha)
-			lenb = len(self.val_beta)
-			leno = len(self.omega)
 
 			# If we don't need to bin the angular values
-			#lena = len(self.alpha)
-			#lenb = len(self.beta)
-			#leno = len(self.omega)
+			lena = len(self.alpha)
+			lenb = len(self.beta)
+			leno = len(self.omega)
+			lent = len(self.theta)
+			print lena, lenb, leno, lent
 
-			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
+			# Reduce alpha and beta to a single index_list
+			idx_list = np.zeros(len(self.meta))
+			for j in range(len(self.meta)):
+				alp = float(self.meta[j,0])
+				omg = float(self.meta[j,2])
+				phi_0 = float(self.phi)
+				chi_0 = float(self.chi)
+				idx_list[j] = int((alp - phi_0)/(np.cos(np.deg2rad(omg))*0.032))
 
-			for i, ind in enumerate(index_list):
-				a = np.where(self.alpha_discr == met[ind, 0])
-				b = np.where(self.alpha_discr == met[ind, 1])
-				#a = np.where(self.alpha == met[ind, 0])
-				#b = np.where(self.beta == met[ind, 1])
-				c = np.where(self.omega == met[ind, 2])
-				# d = np.where(self.theta == met[ind, 4])
+			num_int = len(set(idx_list))	# Number of considered alpha, beta
+											# intervals
+			idx_values = sorted(set(idx_list))	# Values of the indices
 
-				bigarray[a, b, c, :, :] = imgarray[ind, :, :]
+			print 'Check that the number of (phi, chi) steps is', num_int
 
-			np.save(self.directory + '/alpha.npy', list(set(self.alpha_discr)))
-			np.save(self.directory + '/beta.npy', list(set(self.beta_discr)))
-			# np.save(self.directory + '/theta.npy', self.theta)
+			bigarray = np.zeros((num_int, lent, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
+
+			#AA = np.empty([len(self.index_list), 5])
+			for i, ind in enumerate(self.index_list):
+				a = np.where(self.alpha == self.meta[int(ind),0])  	# rock
+				b = np.where(self.beta == self.meta[int(ind),1])  	# roll
+				c = np.where(self.omega == self.meta[int(ind),2])  	# omega
+				d = np.where(self.theta == self.meta[int(ind),4])	# theta
+				idx_rescaled = int((self.meta[int(ind),0] - phi_0) / (np.cos(np.deg2rad(self.meta[int(ind),2])) * 0.032) + ((num_int - 1) / 2))
+				e = (idx_rescaled - ((num_int - 1) / 2)) * 0.032
+
+				# Can we effectively reconstruct chi and phi from idx_rescaled?
+				#ph = phi_0 + ((idx_rescaled - 3)*np.cos(np.deg2rad(self.meta[int(ind),2]))*0.032)
+				#ch = chi_0 + ((idx_rescaled - 3)*(np.tan(np.deg2rad(self.meta[int(ind),2]))*0.032))
+
+				#AA[ind] = [self.meta[int(ind),0], self.meta[int(ind),1],self.meta[int(ind),2], idx_rescaled, self.meta[int(ind),4]]
+
+				bigarray[idx_rescaled, d[0], c[0], :, :] = imgarray[ind, :, :]
+
+			np.save(self.directory + '/alpha.npy', self.alpha)
+			np.save(self.directory + '/beta.npy', self.beta)
+			np.save(self.directory + '/theta.npy', self.theta)
 			np.save(self.directory + '/omega.npy', self.omega)
-
+			np.save(self.directory + '/gamma.npy', [((b - ((num_int - 1)/2))*0.032) for b in range(num_int)])
+			# The gamma angle is a linear combination of alpha and beta
+			np.save(self.directory + '/all_data.npy', self.meta)
 			np.save(self.directory + '/dataarray.npy', bigarray)
+			#np.savetxt(self.directory + '/AA.txt', AA)
 
 
 if __name__ == "__main__":
-	if len(sys.argv) != 9:
-		if len(sys.argv) != 10:
+	if len(sys.argv) != 10:
+		if len(sys.argv) != 11:
 			print "Not enough input parameters. Data input should be:\n\
 	Directory of data\n\
 	Name of data files\n\
@@ -142,6 +157,8 @@ if __name__ == "__main__":
 	Image size\n\
 	Output path\n\
 	Name of new output directory to make\n\
+	Initial phi value\n\
+	Initial chi value\n\
 		"
 		else:
 			mm = makematrix(
@@ -153,7 +170,8 @@ if __name__ == "__main__":
 				sys.argv[6],
 				sys.argv[7],
 				sys.argv[8],
-				sys.argv[9])
+				sys.argv[9],
+				sys.argv[10])
 	else:
 		mm = makematrix(
 			sys.argv[1],
@@ -163,4 +181,6 @@ if __name__ == "__main__":
 			sys.argv[5],
 			sys.argv[6],
 			sys.argv[7],
-			sys.argv[8])
+			sys.argv[8],
+			sys.argv[10],
+			sys.argv[11])
