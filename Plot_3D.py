@@ -43,7 +43,10 @@ for i in range(A_z_val_2[0].size):
         A_z_val_2[i,j] = A[i,j,z_val,2]/Layer_max[i,j]
 A_z_val[:,:] = ( 0.5 * ( A_z_val_0[:,:] + A_z_val_1[:,:]))
 
-# Use an inverted colors heatmap (high values at the centre)
+# The best way to understand the distribution of the angles and of the weight
+# parameter is to use an inverted diverging colormap (high values at the centre)
+# This because we expect most orientation values to be at the centre, not at the
+# extremes
 inv = cmap_map(lambda x: 1-x, plt.cm.Spectral)
 
 plt.subplot(221)
@@ -55,11 +58,11 @@ plt.imshow(A_z_val_1, cmap = inv)
 plt.title('Gamma')
 
 plt.subplot(223)
-plt.imshow(A_z_val_2, cmap = inv)
+plt.imshow(A_z_val_2)
 plt.title('Weight')
 
 plt.subplot(224)
-plt.imshow(A_z_val-2, cmap = inv)
+plt.imshow(A_z_val-2)
 plt.title('Combined value')
 
 plt.show()

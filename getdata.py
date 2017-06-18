@@ -1,3 +1,5 @@
+# python getdata.py /u/data/andcj/hxrm/Al_april_2017/topotomo/sundaynight topotomo_frelon_far_ /u/data/andcj/hxrm/Al_april_2017/topotomo/monday/bg topotomo_frelon_far_ 256,256 200,200 /u/data/alcer/DFXRM_rec Rec_test 0.785 -3.319
+
 from lib.miniged import GetEdfData
 import sys
 import time
