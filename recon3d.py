@@ -395,6 +395,7 @@ class main():
 							#						R_up,
 							#						T_up))))))))))
 		return T_s2d
+		pritn ('T_s2d done')
 
 	def outputfiles(self, grain_ang):
 		print "Saving grain_ang file..."

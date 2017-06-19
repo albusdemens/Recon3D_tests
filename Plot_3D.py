@@ -13,7 +13,7 @@ import sys
 from cmap_map import cmap_map
 
 # Load the npy array
-A = np.load('/Users/Alberto/Documents/Data_analysis/DFXRM/Results_sunday/grain_ang_1.npy')
+A = np.load('/home/nexmap/alcer/DFXRM/Recon3D/grain_ang_1.npy')
 
 # Considering all z layers, find the max of the mean for the weight
 M = np.zeros(A.shape[2])
@@ -43,11 +43,13 @@ for i in range(A_z_val_2[0].size):
         A_z_val_2[i,j] = A[i,j,z_val,2]/Layer_max[i,j]
 A_z_val[:,:] = ( 0.5 * ( A_z_val_0[:,:] + A_z_val_1[:,:]))
 
+sys.exit()
+
 # The best way to understand the distribution of the angles and of the weight
 # parameter is to use an inverted diverging colormap (high values at the centre)
 # This because we expect most orientation values to be at the centre, not at the
 # extremes
-inv = cmap_map(lambda x: 1-x, plt.cm.Spectral)
+#inv = cmap_map(lambda x: 1-x, plt.cm.Spectral)
 
 plt.subplot(221)
 plt.imshow(A_z_val_0, cmap = inv)
