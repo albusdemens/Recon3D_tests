@@ -351,11 +351,13 @@ class GetEdfData(object):
 		roi = self.roi
 
 		if full:
-			im = (img.GetData(0).astype(np.int64)*100) / self.bg_combined_full
+			im = (img.GetData(0).astype(np.int64)) #/ self.bg_combined_full
+			#im = (img.GetData(0).astype(np.int64)*300) / self.bg_combined_full
 		else:
-			im = (img.GetData(0).astype(np.int64)*100)[
+			#im = (img.GetData(0).astype(np.int64)*300)[
+			im = (img.GetData(0).astype(np.int64))[
 				roi[2]:roi[3],
-				roi[0]:roi[1]] / self.bg_combined
+				roi[0]:roi[1]] #/ self.bg_combined
 
 		im = self.cleanImage(im)
 
@@ -430,8 +432,8 @@ class GetEdfData(object):
 		def addToArray(index_part):
 			if self.rank == 0:
 				print "Loading array from data files..."
-			point = len(index_part) / 100
-			incr = len(index_part) / 100
+			point = len(index_part)# / 100
+			incr = len(index_part)# / 100
 			imgarray_part = np.zeros((len(index_part), len(img[:, 0]), len(img[0, :])))
 			for i in range(len(index_part)):
 				if self.rank == 0 and i % (5 * point) == 0:

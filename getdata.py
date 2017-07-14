@@ -102,7 +102,6 @@ class makematrix():
 			lenb = len(self.beta)
 			leno = len(self.omega)
 			lent = len(self.theta)
-			print lena, lenb, leno, lent
 
 			# Reduce alpha and beta to a single index_list
 			idx_list = np.zeros(len(self.meta))
@@ -119,15 +118,16 @@ class makematrix():
 
 			print 'Check that the number of (phi, chi) steps is', num_int
 
-			bigarray = np.zeros((num_int, lent, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
+			bigarray = np.zeros((num_int, lent, leno, int(imsiz[0]), int(imsiz[1])), dtype=np.uint16)
+			Image_prop = np.zeros([len(self.index_list), 4])
 
 			#AA = np.empty([len(self.index_list), 5])
 			for i, ind in enumerate(self.index_list):
-				a = np.where(self.alpha == self.meta[int(ind),0])  	# rock
-				b = np.where(self.beta == self.meta[int(ind),1])  	# roll
-				c = np.where(self.omega == self.meta[int(ind),2])  	# omega
-				d = np.where(self.theta == self.meta[int(ind),4])	# theta
-				idx_rescaled = int((self.meta[int(ind),0] - phi_0) / (np.cos(np.deg2rad(self.meta[int(ind),2])) * 0.032) + ((num_int - 1) / 2))
+				a = np.where(self.alpha == self.meta[int(ind),0])  	# Rock
+				b = np.where(self.beta == self.meta[int(ind),1])  	# Roll
+				c = np.where(self.omega == self.meta[int(ind),2])  	# Omega
+				d = np.where(self.theta == self.meta[int(ind),4])	# Theta
+				idx_rescaled = (self.meta[int(ind),0] - phi_0) / (np.cos(np.deg2rad(self.meta[int(ind),2])) * 0.032) + ((num_int - 1) / 2)
 				e = (idx_rescaled - ((num_int - 1) / 2)) * 0.032
 
 				# Can we effectively reconstruct chi and phi from idx_rescaled?
@@ -136,7 +136,14 @@ class makematrix():
 
 				#AA[ind] = [self.meta[int(ind),0], self.meta[int(ind),1],self.meta[int(ind),2], idx_rescaled, self.meta[int(ind),4]]
 
-				bigarray[idx_rescaled, d[0], c[0], :, :] = imgarray[ind, :, :]
+				bigarray[[int(round(idx_rescaled))], d[0], c[0], :, :] = imgarray[ind, :, :]
+
+				# List the properties of the images and write them to a txt
+				Image_prop[int(ind), 0] = int(ind)	# Image number
+				Image_prop[int(ind), 1] = int(round(idx_rescaled)) # Gamma index
+				Image_prop[int(ind), 2] = d[0]	# Theta
+				Image_prop[int(ind), 3] = c[0]	#
+
 
 			np.save(self.directory + '/alpha.npy', self.alpha)
 			np.save(self.directory + '/beta.npy', self.beta)
@@ -147,7 +154,7 @@ class makematrix():
 			np.save(self.directory + '/all_data.npy', self.meta)
 			np.save(self.directory + '/dataarray.npy', bigarray)
 			#np.savetxt(self.directory + '/AA.txt', AA)
-
+			np.savetxt(self.directory + '/Image_properties.txt', Image_prop, fmt='%i %i %i %i')
 
 if __name__ == "__main__":
 	if len(sys.argv) != 10:
