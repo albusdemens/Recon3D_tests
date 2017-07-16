@@ -1,6 +1,4 @@
-# python getdata.py /u/data/andcj/hxrm/Al_april_2017/topotomo/sundaynight topotomo_frelon_far_ /u/data/andcj/hxrm/Al_april_2017/topotomo/monday/bg topotomo_frelon_far_ 256,256 200,200 /u/data/alcer/DFXRM_rec Rec_test 0.785 -3.319
-
-# python getdata.py /u/data/andcj/hxrm/Al_april_2017/topotomo/sundaynight topotomo_frelon_far_ /home/nexmap/alcer/DFXRM/bg_refined topotomo_frelon_far_ 256,256 200,200 /u/data/alcer/DFXRM_rec Rec_test 0.785 -3.319
+# python getdata.py /u/data/andcj/hxrm/Al_april_2017/topotomo/sundaynight topotomo_frelon_far_ /home/nexmap/alcer/DFXRM/bg_refined topotomo_frelon_far_ 256,256 300,300 /u/data/alcer/DFXRM_rec Rec_test 0.785 -3.319
 
 from lib.miniged import GetEdfData	# Read EDF files and plot background
 import sys
@@ -128,7 +126,10 @@ class makematrix():
 				c = np.where(self.omega == self.meta[int(ind),2])  	# Omega
 				d = np.where(self.theta == self.meta[int(ind),4])	# Theta
 				idx_rescaled = (self.meta[int(ind),0] - phi_0) / (np.cos(np.deg2rad(self.meta[int(ind),2])) * 0.032) + ((num_int - 1) / 2)
+				idx_rescaled_1 =  (self.meta[int(ind),1] - chi_0) * np.cos(np.deg2rad(self.meta[int(ind),1])) / (np.sin(np.deg2rad(self.meta[int(ind),2])) * 0.032) + ((num_int - 1) / 2)
 				e = (idx_rescaled - ((num_int - 1) / 2)) * 0.032
+
+				print round(idx_rescaled), round(idx_rescaled_1), np.deg2rad(self.meta[int(ind),2])
 
 				# Can we effectively reconstruct chi and phi from idx_rescaled?
 				#ph = phi_0 + ((idx_rescaled - 3)*np.cos(np.deg2rad(self.meta[int(ind),2]))*0.032)
@@ -142,7 +143,7 @@ class makematrix():
 				Image_prop[int(ind), 0] = int(ind)	# Image number
 				Image_prop[int(ind), 1] = int(round(idx_rescaled)) # Gamma index
 				Image_prop[int(ind), 2] = d[0]	# Theta
-				Image_prop[int(ind), 3] = c[0]	#
+				Image_prop[int(ind), 3] = c[0]	# Omega
 
 
 			np.save(self.directory + '/alpha.npy', self.alpha)

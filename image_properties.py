@@ -24,6 +24,6 @@ B = np.genfromtxt(os.path.join(io_dir +'/List_images.txt'),dtype='str')
 # Make a new text file, where for each line we have the name of the input file,
 # Followed by its properties (from Image_properties.txt)
 
-with open((os.path.join(io_dir + '/Image_name_name&properties.txt')), 'w') as outfp:
+with open((os.path.join(io_dir + '/Img_name_prop.txt')), 'w') as outfp:
     for i in range(A.shape[0]):
-        outfp.write('%4d %4s %4d %4d %4d\n' %(A[i,0], B[i], A[i,1], A[i,2], A[i,3]))
+        outfp.write('%4s, %05d, %04d, %04d, %04d\n' %(B[i], A[i,0], A[i,1], A[i,2], A[i,3]))
