@@ -1,60 +1,13 @@
-# Script to analyze the images collected at a certain omega
+# Derived from Plot_data_1omega.py (code split after memory leak)
+# Aim: plot the images collected at a certain projection
 
 import numpy as np
 import matplotlib.pyplot as plt
-import lib.EdfFile as EF
-import sys
 
 A = np.load('/u/data/alcer/DFXRM_rec/Rec_test/dataarray.npy')
 
 # Select projection number
 omega = 2
-
-int = np.empty([A.shape[0], A.shape[1]])
-Img_array = np.empty([A.shape[0], A.shape[1], A.shape[3], A.shape[4]])
-for i in range(A.shape[0]):
-    for j in range(A.shape[1]):
-        int[i,j] = sum(sum(A[i,j,omega,:,:]))
-        if int[i,j] > 0:
-            Img_array[i,j,:,:] = A[i,j,omega,:,:]
-
-# Analyze distribution of recorded images as a function of angles
-int = np.empty([A.shape[0], A.shape[1]])
-for oo in range(A.shape[2]):
-    for i in range(A.shape[0]):
-        for j in range(A.shape[1]):
-            int[i,j] = int[i,j] + sum(sum(A[i,j,oo,:,:]))
-
-#plt.imshow(int)
-#plt.title('Distribution of the recorded images as a function of the motor angles')
-#plt.xlabel('Theta')
-#plt.ylabel('Gamma')
-#plt.show()
-
-# Sum images collected at a certain angle
-Array_ang_val = np.empty([A.shape[0], A.shape[1], A.shape[3], A.shape[4]])
-Sum_img = np.zeros([A.shape[3], A.shape[4]])
-int = np.empty([A.shape[0], A.shape[1]])
-for ii in range(A.shape[0]):
-    for jj in range(A.shape[1]):
-        int[ii,jj] = sum(sum(A[ii,jj,omega,:,:]))
-        if int[ii,jj] > 0:
-            Array_ang_val[ii, jj,:,:] = A[ii,jj,omega,:,:]
-            Sum_img[:,:] = Sum_img[:,:] + A[ii,jj,omega,:,:]
-      
-# Plot the distribution of integrated intensity values in the gamma, theta plane
-#plt.imshow(int)
-#plt.title('Distribution of the recorded images as a function of the motor angles')
-#plt.xlabel('Theta')
-#plt.ylabel('Gamma')
-#plt.show()
-
-# Plot the sum of the summed images
-#fig = plt.figure()
-#plt.imshow(Sum_img)
-#plt.xlabel('X (pixels)')
-#plt.ylabel('Y (pixels)')
-#plt.show()
 
 # We want to plot, in a grid, all images collected at a certain projection
 # Load the datafile with all information, and store to an array the data 
@@ -72,8 +25,8 @@ for i in range(Data.shape[0]):
 
 aa = int(Data_angle[0,0])
 bb = int(Data_angle[0,1])
-AA = np.zeros([Img_array.shape[2], Img_array.shape[3]])
-AA[:,:] = Img_array[aa,bb,:,:]
+AA = np.zeros([A.shape[3], A.shape[4]])
+AA[:,:] = A[aa,bb,omega,:,:]
 
 fig, axes = plt.subplots(7, 7)
 
@@ -402,22 +355,22 @@ plt.imshow(A[int(aa),int(bb),omega,:,:])
 a1 = fig.add_subplot(7,7,47)
 plt.setp(a1.get_xticklabels(), visible=False)
 plt.setp(a1.get_yticklabels(), visible=False)
-aa = Data_angle[47,0]
-bb = Data_angle[47,1] 
+aa = Data_angle[46,0]
+bb = Data_angle[46,1] 
 plt.imshow(A[int(aa),int(bb),omega,:,:])
 
 a1 = fig.add_subplot(7,7,48)
 plt.setp(a1.get_xticklabels(), visible=False)
 plt.setp(a1.get_yticklabels(), visible=False)
-aa = Data_angle[48,0]
-bb = Data_angle[48,1] 
+aa = Data_angle[47,0]
+bb = Data_angle[47,1] 
 plt.imshow(A[int(aa),int(bb),omega,:,:])
 
 a1 = fig.add_subplot(7,7,49)
 plt.setp(a1.get_xticklabels(), visible=False)
 plt.setp(a1.get_yticklabels(), visible=False)
-aa = Data_angle[49,0]
-bb = Data_angle[49,1] 
+aa = Data_angle[48,0]
+bb = Data_angle[48,1] 
 plt.imshow(A[int(aa),int(bb),omega,:,:])
 
 plt.axis('off')
