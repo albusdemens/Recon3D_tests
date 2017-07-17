@@ -1,14 +1,9 @@
-# If pseudomotors have been used, this script returns the angle values before
-# binning
-
 from lib.miniged import GetEdfData
 import sys
 import time
 import os
 import warnings
 import numpy as np
-import pdb 	# For debugging
-from find_nearest import find_nearest, find_nearest_idx
 
 try:
 	from mpi4py import MPI
@@ -57,28 +52,14 @@ class makematrix():
 			int(int(poi[1]) + int(imgsize[1]) / 2)]
 
 		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
-		self.alpha, self.beta, self.omega = data.getMetaValues() # Redefine
+		self.alpha, self.beta, self.omega, self.theta = data.getMetaValues()
 
-		# Alpha and beta values were measured at irregular steps. To make things
-		# easy, we bin the values in 7 intervals per variable
-		#[count_alpha, extremes_alpha] = np.histogram(self.alpha, 7)
-		#self.val_alpha = np.zeros(len(extremes_alpha)-1)
-		#[count_beta, extremes_beta] = np.histogram(self.beta, 7)
-		#self.val_beta = np.zeros(len(extremes_beta)-1)
+		self.index_list = range(len(data.meta))
+		self.meta = data.meta
 
-		# Find center of each bin
-		#for i in range(0,len(extremes_alpha)-1):
-		#	self.val_alpha[i] = np.mean([extremes_alpha[i], extremes_alpha[i+1]])
-		#for j in range(0,len(extremes_beta)-1):
-		#	self.val_beta[j] = np.mean([extremes_beta[j], extremes_beta[j+1]])
-
-		# For each experimental value, find closest bin centre
-		#self.alpha_discr = np.zeros(len(self.alpha))
-		#for i in range(0, len(self.alpha)):
-		#	self.alpha_discr[i] = find_nearest(self.val_alpha,self.alpha[i])
-		#self.beta_discr = np.zeros(len(self.beta))
-		#for j in range(0, len(self.beta)):
-		#	self.beta_discr[j] = find_nearest(self.val_beta,self.beta[j])
+		self.calcEta(data)
+		self.calcTheta(data)
+		# self.calcEtaIndexList(data, eta)
 
 		self.allFiles(data, imgsize)
 
@@ -94,27 +75,78 @@ class makematrix():
 			os.makedirs(directory)
 		return directory
 
-	def allFiles(self, data, imsiz):
-		index_list = range(len(data.meta))
-		met = data.meta	# All motor positions listed
+	def calcEta(self, data):
+		for om in self.omega:
+			ind = np.where(self.meta[:, 2] == om)
+			a = self.meta[ind, 0][0]
 
-		print met[5520:5650,2]
+			eta1 = (a - data.alpha0) / np.cos(np.radians(om))
+			self.eta = np.sort(list(set(eta1)))
+
+		self.etaindex = np.zeros((len(self.index_list)))
+
+		for ind in self.index_list:
+			om = self.meta[ind, 2]
+			a = self.meta[ind, 0] - data.alpha0
+			eta1 = a / np.cos(np.radians(om))
+
+			etapos = np.where(self.eta == min(self.eta, key=lambda x: abs(x-eta1)))[0][0]
+
+			self.etaindex[ind] = self.eta[etapos]
+
+	def calcTheta(self, data):
+		self.thetafake = data.theta0 + np.arange(-3.5 * 0.032, 3.5 * 0.032, 0.032)
+		self.thetaindex = np.zeros((len(self.index_list)))
+		for ind in self.index_list:
+			t = self.meta[ind, 4] - data.theta0
+			thetapos = np.where(self.thetafake == min(self.thetafake, key=lambda x: abs(x-t)))[0][0]
+			self.thetaindex[ind] = self.thetafake[thetapos]
+	# def calcEtaIndexList(self, data, eta):
+	# 	self.etaindex = np.zeros((len(self.index_list)))
+	#
+	# 	for ind in self.index_list:
+	# 		om = self.meta[ind, 2]
+	# 		a = self.meta[ind, 0] - data.alpha0
+	# 		eta1 = a / np.cos(np.radians(om))
+	#
+	# 		etapos = np.where(eta == min(eta, key=lambda x: abs(x-eta1)))[0][0]
+	#
+	# 		self.etaindex[ind] = eta[etapos]
+
+	def allFiles(self, data, imsiz):
+		# index_list = range(len(data.meta))
+		# met = data.meta
+
+		# theta = data.theta0 + np.arange(-3.5 * 0.032, 3.5 * 0.032, 0.032)
 
 		with warnings.catch_warnings():
 			warnings.simplefilter("ignore")
-			#imgarray = data.makeImgArray(index_list, 50, 'linetrace')	# Reading the images
+			imgarray = data.makeImgArray(self.index_list, 50, 'linetrace')
 
 		if self.rank == 0:
-			lena = len(self.alpha)
-			lenb = len(self.beta)
+			# lena = len(self.theta)
+			lena = len(self.thetafake)
+			lenb = len(self.eta)
 			leno = len(self.omega)
 
-			bigarray = np.zeros((lena, lenb, 1, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
+			bigarray = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 
-			#AA = met[np.where(met[:, 2]==90.4),:]
+			for i, ind in enumerate(self.index_list):
+				a = np.where(self.thetafake == self.thetaindex[ind])  # theta
+				b = np.where(self.eta == self.etaindex[ind])  # roll
+				c = np.where(self.omega == self.meta[ind, 2])  # omega
+				# d = np.where(self.theta == met[ind, 4])
 
-			# Save all data in one output file
-			np.save(self.directory + '/All_data.npy', met)
+				bigarray[a, b, c, :, :] = imgarray[ind, :, :]
+
+			# np.save(self.directory + '/alpha.npy', self.alpha)
+			# np.save(self.directory + '/beta.npy', self.beta)
+			np.save(self.directory + '/eta.npy', self.eta)
+			np.save(self.directory + '/theta.npy', self.thetafake)
+			np.save(self.directory + '/omega.npy', self.omega)
+
+			np.save(self.directory + '/dataarray.npy', bigarray)
+
 
 if __name__ == "__main__":
 	if len(sys.argv) != 9:
@@ -149,4 +181,4 @@ if __name__ == "__main__":
 			sys.argv[5],
 			sys.argv[6],
 			sys.argv[7],
-			sys.argv[8])
+			sys.argv[8],)
