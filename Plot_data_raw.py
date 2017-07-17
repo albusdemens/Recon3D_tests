@@ -2,13 +2,26 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+<<<<<<< HEAD
 
 Data = np.load('/u/data/alcer/DFXRM_rec/Rec_test/all_data.npy')
+=======
+from mpl_toolkits.mplot3d import Axes3D
+
+def randrange(n, vmin, vmax):
+    return (vmax-vmin)*np.random.rand(n) + vmin
+
+Data = np.load('/Users/Alberto/Documents/Data_analysis/DFXRM/Results_sunday/All_data.npy')
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 
 # Plot distribution of motor values
 alpha = Data[:,0]
 beta = Data[:,1]
 omega = Data[:,2]
+<<<<<<< HEAD
+=======
+theta = Data[:,4]
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 
 # Print all rotation angles
 print(np.sort(list(set(omega))))
@@ -29,11 +42,39 @@ Om = 0.8
 idx = np.where(omega==Om)
 alpha_select = alpha[idx]
 beta_select = beta[idx]
+<<<<<<< HEAD
 
 # For the selected omega, plot the angular distribution
 fig = plt.figure(figsize=(12,9))
 
 fig.suptitle('Alpha and beta values for omega = 0.8 deg', fontsize=20)
+=======
+theta_select = theta[idx]
+
+# Plot, in 3D, the (alpha, beta, theta) distribution
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+n = 100
+ax.scatter(alpha_select, beta_select, theta_select, c='g', marker='o')
+
+ax.set_xlabel('Alpha (degrees)')
+ax.set_ylabel('Beta (degrees)')
+ax.set_zlabel('Theta (degrees)')
+
+plt.show()
+
+# For a selected omega, plot the angular distribution
+fig = plt.figure(figsize=(12,9))
+
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
+
+fig.suptitle(r'$\alpha$ and $\beta$ values for $\omega = 179.2^{\circ}$', fontsize=20)
+
+label_size = 16
+plt.rcParams['xtick.labelsize'] = label_size
+plt.rcParams['ytick.labelsize'] = label_size
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 
 plt.subplot(121)
 plt.plot(alpha_select)

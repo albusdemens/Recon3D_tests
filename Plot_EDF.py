@@ -6,6 +6,7 @@ import lib.EdfFile as EF
 import sys
 
 im = EF.EdfFile(sys.argv[1])
+<<<<<<< HEAD
 print im.GetHeader(0)
 
 sys.exit()
@@ -16,6 +17,12 @@ image_data = im.GetHeader(0)
 im_flip = np.fliplr(image)
 
 fig = plt.figure()
+=======
+image = im.GetData(0)
+#im_flip = np.fliplr(image)
+
+#fig = plt.figure()
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 #a=fig.add_subplot(1,2,1)
 #imgplot = plt.imshow(image)
 #a.set_title('Image')
@@ -23,6 +30,7 @@ fig = plt.figure()
 #imgplot = plt.imshow(im_flip)
 #a.set_title('Flipped image')
 
+<<<<<<< HEAD
 #plt.imshow(image[100:400, 100:400])
 #plt.show()
 
@@ -78,12 +86,15 @@ sys.exit()
 
 fig = plt.figure()
 a=fig.add_subplot(1,2,1)
+=======
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 plt.imshow(image)
 a.set_title('Raw image')
 b=fig.add_subplot(1,2,2)
 plt.imshow(B)
 b.set_title('Image from npy array')
 plt.show()
+<<<<<<< HEAD
 
 int_interval = np.empty(shape=[A.shape[0], A.shape[1]])
 for i in range(A.shape[0]):
@@ -99,3 +110,7 @@ plt.show()
 
 
 
+=======
+#plt.imshow(im_flip)
+#plt.show()
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637

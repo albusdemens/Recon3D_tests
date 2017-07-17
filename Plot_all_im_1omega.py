@@ -7,7 +7,11 @@ import matplotlib.pyplot as plt
 A = np.load('/u/data/alcer/DFXRM_rec/Rec_test/dataarray.npy')
 
 # Select projection number
+<<<<<<< HEAD
 omega = 200
+=======
+omega = 2
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 
 # We want to plot, in a grid, all images collected at a certain projection
 # Load the datafile with all information, and store to an array the data 

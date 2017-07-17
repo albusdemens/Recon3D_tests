@@ -380,6 +380,23 @@ class main():
 									np.matmul(
 										T_ga,
 										Omega)))))))
+<<<<<<< HEAD
+=======
+
+
+							#	Omega,
+							#	np.matmul(
+							#		Tinv_lo,
+							#		np.matmul(
+							#			R_lo,
+							#			np.matmul(
+							#				T_lo,
+							#				np.matmul(
+							#					Tinv_up,
+							#					np.matmul(
+							#						R_up,
+							#						T_up))))))))))
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 		return T_s2d
 		pritn ('T_s2d done')
 

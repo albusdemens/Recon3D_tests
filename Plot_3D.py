@@ -10,7 +10,11 @@ from mpl_toolkits.mplot3d import Axes3D
 import math
 from itertools import count
 import sys
+<<<<<<< HEAD
 #from cmap_map import cmap_map
+=======
+from cmap_map import cmap_map
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 
 # Load the npy array
 A = np.load('/home/nexmap/alcer/DFXRM/Recon3D/grain_ang_1.npy')
@@ -35,6 +39,7 @@ A_z_val_0 = np.empty(shape=[A.shape[0], A.shape[1]])
 A_z_val_1 = np.empty(shape=[A.shape[0], A.shape[1]])
 A_z_val_2 = np.empty(shape=[A.shape[0], A.shape[1]])
 
+<<<<<<< HEAD
 A_z_val_0[:,:] = A[:,:,z_val,0]/np.mean(A[:,:,z_val,0])
 A_z_val_1[:,:] = A[:,:,z_val,1]/np.mean(A[:,:,z_val,1])
 A_z_val_2[:,:] = A[:,:,z_val,2]/np.mean(A[:,:,z_val,2])
@@ -43,6 +48,17 @@ A_z_val_2[:,:] = A[:,:,z_val,2]/np.mean(A[:,:,z_val,2])
 #    for j in range(A_z_val_2[1].size):
 #        A_z_val_2[i,j] = A[i,j,z_val,2]/Layer_max[i,j]
 A_z_val[:,:] = A_z_val_0[:,:] + A_z_val_1[:,:]#(A_z_val_2[:,:]  * ( A_z_val_0[:,:] + A_z_val_1[:,:]))
+=======
+A_z_val_0[:,:] = A[:,:,z_val,0]#/np.mean(A[:,:,z_val,0])
+A_z_val_1[:,:] = A[:,:,z_val,1]#/np.mean(A[:,:,z_val,1])
+layer_mean = np.mean(A[:,:,z_val,2])
+for i in range(A_z_val_2[0].size):
+    for j in range(A_z_val_2[1].size):
+        A_z_val_2[i,j] = A[i,j,z_val,2]/Layer_max[i,j]
+A_z_val[:,:] = ( 0.5 * ( A_z_val_0[:,:] + A_z_val_1[:,:]))
+
+sys.exit()
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 
 # The best way to understand the distribution of the angles and of the weight
 # parameter is to use an inverted diverging colormap (high values at the centre)
@@ -51,11 +67,19 @@ A_z_val[:,:] = A_z_val_0[:,:] + A_z_val_1[:,:]#(A_z_val_2[:,:]  * ( A_z_val_0[:,
 #inv = cmap_map(lambda x: 1-x, plt.cm.Spectral)
 
 plt.subplot(221)
+<<<<<<< HEAD
 plt.imshow(A_z_val_0)
 plt.title('Theta')
 
 plt.subplot(222)
 plt.imshow(A_z_val_1)
+=======
+plt.imshow(A_z_val_0, cmap = inv)
+plt.title('Theta')
+
+plt.subplot(222)
+plt.imshow(A_z_val_1, cmap = inv)
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 plt.title('Gamma')
 
 plt.subplot(223)

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # This script cleans the DFXRM images
+=======
+# This script analyses the background images used in the DFXRM reconstruction
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -44,6 +48,10 @@ for i in range(A.shape[0]):
         if int[i,j] > 0:
             Img_array[i,j,:,:] = A[i,j,omega,:,:]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 # Sum images collected at a certain angle
 Array_ang_val = np.empty([A.shape[0], A.shape[1], A.shape[3], A.shape[4]])
 Sum_img = np.zeros([A.shape[3], A.shape[4]])
@@ -73,12 +81,20 @@ for i in range(Clean_sum_img.shape[0]):
         if (Clean_sum_img[i,j] < 0 or Clean_sum_img[i,j] > 1E+06):
             Clean_sum_img[i,j] = 0
 
+<<<<<<< HEAD
 # Plot an example for a single projection
+=======
+# Plot the relevant results
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 fig=plt.figure()
 
 ax1=fig.add_subplot(121)
 plt.imshow(Sum_img)
+<<<<<<< HEAD
 ax1.title.set_text('Summed images -- raw')
+=======
+ax1.title.set_text('Summed images - raw')
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
 
 ax2=fig.add_subplot(122)
 plt.imshow(Clean_sum_img)
@@ -89,4 +105,7 @@ plt.show()
 
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
