@@ -81,7 +81,7 @@ class GetEdfData(object):
 
 		self.sampletitle = filename
 		self.path = path
-		self.bg_path = bg_path
+		#self.bg_path = bg_path
 		self.roi = roi
 		self.simulated = simulated
 
