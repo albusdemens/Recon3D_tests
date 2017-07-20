@@ -3,12 +3,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import sys
 
 # Remember to check the path for the IO directory
 io_dir = '/u/data/alcer/DFXRM_rec/Rec_test_2/'
 
 A = np.load(os.path.join(io_dir + 'dataarray.npy'))
 Theta = np.load(os.path.join(io_dir + 'theta.npy'))
+print Theta.shape
 
 # For each projection, mark the motor position in the pseudomotor, theta space
 Counter = np.zeros([A.shape[2], A.shape[0], A.shape[1]])
@@ -32,14 +34,17 @@ for aa in range(A.shape[2]):
         # Loop over the pseudomotor cvalues
         for cc in range(A.shape[1]):
             if Counter[aa, bb, cc] > 0:
-                Counter_deg[num_pos_1, 0] = aa  # Projection number
-                Counter_deg[num_pos_1, 1] = bb  # Pseudomotor index
-                Counter_deg[num_pos_1, 2] = cc  # Theta index
-                Counter_deg[num_pos_1, 3] = Theta[cc,0] # Theta in degrees
+                num_pos_1 = num_pos_1 + 1
+                Counter_deg[num_pos_1 - 1, 0] = aa  # Projection number
+                Counter_deg[num_pos_1 - 1, 1] = bb  # Pseudomotor index
+                Counter_deg[num_pos_1 - 1, 2] = cc  # Theta index
+                Counter_deg[num_pos_1 - 1, 3] = Theta[cc] # Theta in degrees
 
 # Plot (pseudmotor, theta) distribution for a single projection
+deg = 5
+
 fig = plt.figure()
-plt.imshow(Counter[5, :, :])
+plt.imshow(Counter[deg, :, :])
 plt.title('Motor positions in the (pseudomotor, theta index) space')
 plt.xlabel('Theta (index)')
 plt.ylabel('Pseudomotor (index)')
@@ -49,7 +54,7 @@ plt.show()
 Counter_1 = np.zeros(11*11, 4)
 line_num = 0
 for i in range(Counter_deg.shape[0]):
-    if Counter_deg[i, 0] == 3:
+    if Counter_deg[i, 0] == deg:
         line_num = line_num + 1
         Counter_1[line_num,:] = Counter_deg[i,:]
 
