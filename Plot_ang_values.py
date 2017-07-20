@@ -10,7 +10,6 @@ io_dir = '/u/data/alcer/DFXRM_rec/Rec_test_2/'
 
 A = np.load(os.path.join(io_dir + 'dataarray.npy'))
 Theta = np.load(os.path.join(io_dir + 'theta.npy'))
-print Theta.shape
 
 # For each projection, mark the motor position in the pseudomotor, theta space
 Counter = np.zeros([A.shape[2], A.shape[0], A.shape[1]])
