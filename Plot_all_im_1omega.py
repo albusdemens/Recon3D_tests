@@ -32,9 +32,9 @@ bb = int(Data_angle[0,1])
 AA = np.zeros([A.shape[3], A.shape[4]])
 AA[:,:] = A[aa,bb,omega,:,:]
 
-fig, axes = plt.subplots(7, 7)
-for i in range(7*7):
-    a1 = fig.add_subplot(7,7,i+1)
+fig, axes = plt.subplots(A.shape[0], A.shape[0])
+for i in range(A.shape[0]*A.shape[0]):
+    a1 = fig.add_subplot(A.shape[0],A.shape[0],i+1)
     plt.setp(a1.get_xticklabels(), visible=False)
     plt.setp(a1.get_yticklabels(), visible=False)
     aa = Data_angle[i,0]

@@ -59,9 +59,15 @@ for i in range(Counter_deg.shape[0]):
 
 fig = plt.figure()
 plt.scatter(Counter_1[:,3], Counter_1[:,1])
+plt.title('(theta, pseudomotor) for one projection')
+plt.xlabel('Theta (degrees)')
+plt.ylabel('Pseudomotor (index)')
 plt.show()
 
 # Plot (pseudomotor, theta) distribution for all projections
 fig = plt.figure()
-plt.scatter(Counter_deg[:,3], Counter_deg[:,1])
+plt.title('(theta, pseudomotor) for all projections')
+plt.scatter(Counter_deg[:,3], Counter_deg[:,1], s=2)
+plt.xlabel('Theta (degrees)')
+plt.ylabel('Pseudomotor (index)')
 plt.show()
