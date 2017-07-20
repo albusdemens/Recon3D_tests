@@ -51,7 +51,7 @@ plt.ylabel('Pseudomotor (index)')
 plt.show()
 
 # Plot (pseudomotor, theta) distribution for a single projections
-Counter_1 = np.zeros(11*11, 4)
+Counter_1 = np.zeros([11*11, 4])
 line_num = 0
 for i in range(Counter_deg.shape[0]):
     if Counter_deg[i, 0] == deg:
