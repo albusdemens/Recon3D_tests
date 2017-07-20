@@ -1,20 +1,29 @@
-# this script plots the distribution of the angular values fro one omega
+# This script plots the distribution of the angular values for every omega
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
-A = np.load('/u/data/alcer/DFXRM_rec/Rec_test/dataarray.npy')
+# Remember to check the path for the IO directory
+io_dir = '/u/data/alcer/DFXRM_rec/Rec_test/'
 
-Counter = np.zeros([A.shape[0], A.shape[1]])
-for aa in range(A.shape[0]):
-    for bb in range(A.shape[1]):
-<<<<<<< HEAD
-        if sum(sum(A[aa,bb,5,:,:])) > 0:
-=======
-        if sum(sum(A[aa,bb,1,:,:])) > 0:
->>>>>>> 077febf5ee14058f5f57ce942f86a24dc78c3637
-            Counter[aa, bb] = 1
+A = np.load(os.path.join(io_dir + 'dataarray.npy')
+Theta = np.load(os.path.join(io_dir + 'theta.npy')
 
+# For each projection, mark the motor position in the pseudomotor, theta space
+Counter = np.zeros([A.shape[2], A.shape[0], A.shape[1]])
+# Loop over projections
+for aa in range(A.shape[2]):
+    # Loop over the theta values
+    for bb in range(A.shape[0]):
+        # Loop over the pseudomotor cvalues
+        for cc in range(A.shape[1]):
+            if sum(sum(A[bb,cc,aa,:,:])) > 0:
+                Counter[aa, bb, cc] = 1
+
+# Plot (pseudmotor, theta) distribution for a single projection
 fig = plt.figure()
-plt.imshow(Counter)
+plt.imshow(Counter[5, :, :])
 plt.show()
+
+# Plot (pseudomotor, theta) distribution for all projections
