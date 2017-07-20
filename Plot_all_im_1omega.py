@@ -42,3 +42,39 @@ for i in range(A.shape[0]*A.shape[0]):
     plt.imshow(A[int(aa),int(bb),omega,:,:])
 
 plt.show()
+
+# Plot how the integrated intensity changes during the rocking scan
+II_matrix_temp = np.zeros([A.shape[0], A.shape[0], A.shape[2]])
+II_matrix = np.zeros([A.shape[0], A.shape[0]])
+for oo in range(A.shape[2]):
+    for i in range(Data_angle.shape[0]):
+        aa = Data_angle[i,0]
+        bb = Data_angle[i,1]
+        II_matrix_temp[ int(aa), int(i - int(aa) * A.shape[0]), oo ] = sum(sum(A[int(aa),int(bb),oo,:,:]))
+for aa in range(II_matrix_temp.shape[0]):
+    for bb in range(II_matrix_temp.shape[1]):
+        II_matrix[aa, bb] = sum(II_matrix_temp[aa,bb,:])
+
+fig = plt.figure()
+plt.imshow(II_matrix)
+plt.title('Distribution of the integrated intensities (all proj)')
+plt.xlabel('Theta (index)')
+plt.ylabel('Pseudomotor (index)')
+plt.show()
+
+# Return the coordinates where we have the lower integrated intensity
+II_value = np.zeros([A.shape[0]*A.shape[0], 3])
+lin_n = 0
+for aa in range(II_matrix.shape[0]):
+    for bb in range(II_matrix.shape[1]):
+        lin_n = lin_n + 1
+        II_value[lin_n,0] = aa
+        II_value[lin_n,1] = bb
+        II_value[lin_n,2] = II_matrix[aa, bb]
+
+# Sort integrated intensities; for the rolling median consider the images giving
+# the two lower values
+i = II_value[:,0].argsort()
+II_value_sorted = II_value[i]
+
+print II_value_sorted
