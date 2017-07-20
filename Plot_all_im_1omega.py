@@ -11,7 +11,7 @@ io_dir = '/u/data/alcer/DFXRM_rec/Rec_test_2/'
 A = np.load(os.path.join(io_dir + 'dataarray.npy'))
 
 # Select projection number
-omega = 2
+omega = 100
 
 # We want to plot, in a grid, all images collected at a certain projection
 # Load the datafile with all information, and store to an array the data
@@ -25,13 +25,7 @@ for i in range(Data.shape[0]):
         Data_angle[idx-1, 0] = Data[i,1]
         Data_angle[idx-1, 1] = Data[i,2]
 
-# Plot the various recorded images
-
-aa = int(Data_angle[0,0])
-bb = int(Data_angle[0,1])
-AA = np.zeros([A.shape[3], A.shape[4]])
-AA[:,:] = A[aa,bb,omega,:,:]
-
+# Plot the various recorded images (one projection)
 fig, axes = plt.subplots(A.shape[0], A.shape[0])
 for i in range(A.shape[0]*A.shape[0]):
     a1 = fig.add_subplot(A.shape[0],A.shape[0],i+1)
@@ -43,17 +37,29 @@ for i in range(A.shape[0]*A.shape[0]):
 
 plt.show()
 
+# Plot the various recorded images (all projections)
+
+fig, axes = plt.subplots(A.shape[0], A.shape[0])
+for i in range(A.shape[0]*A.shape[0]):
+    a1 = fig.add_subplot(A.shape[0],A.shape[0],i+1)
+    plt.setp(a1.get_xticklabels(), visible=False)
+    plt.setp(a1.get_yticklabels(), visible=False)
+    aa = int(Data_angle[i,0])
+    bb = int(Data_angle[i,1])
+
+    AA = np.zeros([A.shape[3], A.shape[4]])
+    for oo in range(A.shape[2]):
+        AA[:,:] += A[aa,bb,oo,:,:]
+    plt.imshow(AA[:,:])
+
+plt.show()
+
 # Plot how the integrated intensity changes during the rocking scan
-II_matrix_temp = np.zeros([A.shape[0], A.shape[0], A.shape[2]])
 II_matrix = np.zeros([A.shape[0], A.shape[0]])
-for oo in range(A.shape[2]):
-    for i in range(Data_angle.shape[0]):
-        aa = Data_angle[i,0]
-        bb = Data_angle[i,1]
-        II_matrix_temp[ int(aa), int(i - int(aa) * A.shape[0]), oo ] = sum(sum(A[int(aa),int(bb),oo,:,:]))
-for aa in range(II_matrix_temp.shape[0]):
-    for bb in range(II_matrix_temp.shape[1]):
-        II_matrix[aa, bb] = sum(II_matrix_temp[aa,bb,:])
+for i in range(Data_angle.shape[0]):
+    aa = int(Data_angle[i,0])
+    bb = int(Data_angle[i,1])
+    II_matrix[ int(aa), int(i - (int(aa) * A.shape[0])) ] = sum(sum(sum(A[int(aa),int(bb),:,:,:])))
 
 fig = plt.figure()
 plt.imshow(II_matrix)
@@ -68,13 +74,13 @@ lin_n = 0
 for aa in range(II_matrix.shape[0]):
     for bb in range(II_matrix.shape[1]):
         lin_n = lin_n + 1
-        II_value[lin_n,0] = aa
-        II_value[lin_n,1] = bb
-        II_value[lin_n,2] = II_matrix[aa, bb]
+        II_value[lin_n - 1, 0] = int(aa)
+        II_value[lin_n - 1, 1] = int(bb)
+        II_value[lin_n - 1, 2] = II_matrix[aa, bb]
 
 # Sort integrated intensities; for the rolling median consider the images giving
 # the two lower values
-i = II_value[:,0].argsort()
-II_value_sorted = II_value[i]
+i = II_value[:,2].argsort()
+II_value_sorted = II_value[i,:]
 
-print II_value_sorted
+print 'To clean the dataset, we suggest to use the images number %i and %i' % ( II_value_sorted[0,1] + (II_value_sorted[0,0] * A.shape[0]), II_value_sorted[1,1] + (II_value_sorted[1,0] * A.shape[0]) )
