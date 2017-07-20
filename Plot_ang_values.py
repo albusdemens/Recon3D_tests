@@ -56,7 +56,7 @@ line_num = 0
 for i in range(Counter_deg.shape[0]):
     if Counter_deg[i, 0] == deg:
         line_num = line_num + 1
-        Counter_1[line_num,:] = Counter_deg[i,:]
+        Counter_1[line_num-1,:] = Counter_deg[i,:]
 
 fig = plt.figure()
 plt.scatter(Counter_1[:,3], Counter_1[:,1])
