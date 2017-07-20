@@ -1,4 +1,4 @@
-# python getdata.py /u/data/andcj/hxrm/Al_april_2017/topotomo/sundaynight topotomo_frelon_far_ /home/nexmap/alcer/DFXRM/bg_refined topotomo_frelon_far_ 256,256 300,300 /u/data/alcer/DFXRM_rec Rec_test 0.785 -3.319
+# python getdata.py /u/data/andcj/hxrm/Al_april_2017/topotomo/monday/Al3/topotomoscan c6_topotomo_frelon_far_ 256,256 300,300 /u/data/alcer/DFXRM_rec Rec_test_2 0.69 -1.625
 
 from lib.miniged import GetEdfData	# Read EDF files and plot background
 import sys
@@ -6,7 +6,7 @@ import time
 import os
 import warnings
 import numpy as np
-import pdb 	# For debugging
+import matplotlib.pyplot as plt
 from find_nearest import find_nearest, find_nearest_idx
 
 try:
@@ -18,8 +18,6 @@ except ImportError:
 Inputs:
 Directory of data
 Name of data files
-Directory of background files
-Name of background files
 Point of interest
 Image size
 Output path
@@ -31,8 +29,8 @@ Initial chi value
 
 class makematrix():
 	def __init__(
-		self, datadir,
-		dataname, bgpath, bgfilename,
+		self, datadir, dataname,
+		#dataname, bgpath, bgfilename,
 		poi, imgsize, outputpath, outputdir,
 		phi_0, chi_0,
 		sim=False):
@@ -58,7 +56,8 @@ class makematrix():
 			int(int(poi[1]) - int(imgsize[1]) / 2),
 			int(int(poi[1]) + int(imgsize[1]) / 2)]
 
-		data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
+		#data = GetEdfData(datadir, dataname, bgpath, bgfilename, roi, sim)
+		data = GetEdfData(datadir, dataname, roi, sim)
 
 		self.alpha, self.beta, self.omega, self.theta = data.getMetaValues()
 
@@ -108,13 +107,11 @@ class makematrix():
 				omg = float(self.meta[j,2])
 				phi_0 = float(self.phi)
 				chi_0 = float(self.chi)
-				idx_list[j] = int((alp - phi_0)/(np.cos(np.deg2rad(omg))*0.032))
+				idx_list[j] = int(round((alp - phi_0)/(np.cos(np.deg2rad(omg))*(0.117/2))))
 
 			num_int = len(set(idx_list))	# Number of considered alpha, beta
 											# intervals
 			idx_values = sorted(set(idx_list))	# Values of the indices
-
-			print 'Check that the number of (phi, chi) steps is', num_int
 
 			bigarray = np.zeros((num_int, lent, leno, int(imsiz[0]), int(imsiz[1])), dtype=np.uint16)
 			Image_prop = np.zeros([len(self.index_list), 4])
@@ -125,9 +122,10 @@ class makematrix():
 				b = np.where(self.beta == self.meta[int(ind),1])  	# Roll
 				c = np.where(self.omega == self.meta[int(ind),2])  	# Omega
 				d = np.where(self.theta == self.meta[int(ind),4])	# Theta
-				idx_rescaled = (self.meta[int(ind),0] - phi_0) / (np.cos(np.deg2rad(self.meta[int(ind),2])) * 0.032) + ((num_int - 1) / 2)
-				#idx_rescaled_1 =  (self.meta[int(ind),1] - chi_0) * np.cos(np.deg2rad(self.meta[int(ind),1])) / (np.sin(np.deg2rad(self.meta[int(ind),2])) * 0.032) + ((num_int - 1) / 2)
+				idx_rescaled = (self.meta[int(ind),0] - phi_0) / (np.cos(np.deg2rad(self.meta[int(ind),2])) * (0.117/2)) + ((num_int - 1) / 2)
 				e = (idx_rescaled - ((num_int - 1) / 2)) * 0.032
+
+				print round(idx_rescaled), np.deg2rad(self.meta[int(ind),2])
 
 				# Can we effectively reconstruct chi and phi from idx_rescaled?
 				#ph = phi_0 + ((idx_rescaled - 3)*np.cos(np.deg2rad(self.meta[int(ind),2]))*0.032)
@@ -143,6 +141,7 @@ class makematrix():
 				Image_prop[int(ind), 2] = d[0]	# Theta
 				Image_prop[int(ind), 3] = c[0]	# Omega
 
+			print 'Check that the number of (phi, chi) steps is', num_int
 
 			np.save(self.directory + '/alpha.npy', self.alpha)
 			np.save(self.directory + '/beta.npy', self.beta)
@@ -156,13 +155,11 @@ class makematrix():
 			np.savetxt(self.directory + '/Image_properties.txt', Image_prop, fmt='%i %i %i %i')
 
 if __name__ == "__main__":
-	if len(sys.argv) != 10:
-		if len(sys.argv) != 11:
-			print "Not enough input parameters. Data input should be:\n\
+	if len(sys.argv) != 8:
+		if len(sys.argv) != 9:
+			print "Not enough (or too many) input parameters. Data input should be:\n\
 	Directory of data\n\
 	Name of data files\n\
-	Directory of background files\n\
-	Name of background files\n\
 	Point of interest\n\
 	Image size\n\
 	Output path\n\
@@ -179,9 +176,9 @@ if __name__ == "__main__":
 				sys.argv[5],
 				sys.argv[6],
 				sys.argv[7],
-				sys.argv[8],
-				sys.argv[9],
-				sys.argv[10])
+				sys.argv[8])
+				#sys.argv[9],
+				#sys.argv[10])
 	else:
 		mm = makematrix(
 			sys.argv[1],
@@ -191,6 +188,6 @@ if __name__ == "__main__":
 			sys.argv[5],
 			sys.argv[6],
 			sys.argv[7],
-			sys.argv[8],
-			sys.argv[10],
-			sys.argv[11])
+			sys.argv[8])
+			#sys.argv[10],
+			#sys.argv[11])

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-io_dir = '/u/data/alcer/DFXRM_rec/Rec_test/'
+io_dir = '/u/data/alcer/DFXRM_rec/Rec_test_2/'
 
 A = np.load(os.path.join(io_dir + 'dataarray.npy'))
 
@@ -17,7 +17,7 @@ omega = 2
 # Load the datafile with all information, and store to an array the data
 # relative to the images in a certain projection
 Data = np.loadtxt(os.path.join(io_dir + 'Image_properties.txt'))
-Data_angle = np.zeros([49,2])
+Data_angle = np.zeros([A.shape[0]*A.shape[0],2])
 idx = 0
 for i in range(Data.shape[0]):
     if Data[i,3] == omega:
