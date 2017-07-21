@@ -81,4 +81,4 @@ II_value_sorted = II_value[i,:]
 
 print II_value_sorted
 
-print 'To clean the dataset, we suggest to use the images number %i [%i, %i] and %i [%i, %i]' % ( II_value_sorted[0,1] + (II_value_sorted[0,0] * A.shape[0]), II_value_sorted[0,1], II_value_sorted[0,0], II_value_sorted[1,1] + (II_value_sorted[1,0] * A.shape[0]), II_value_sorted[1,1], II_value_sorted[1,0] )
+print 'To clean the dataset, we suggest to use the images number %i [%i, %i] and %i [%i, %i]' % ( ((II_value_sorted[0,1] + 1) + ( II_value_sorted[0,0]  * A.shape[0])), II_value_sorted[0,0], II_value_sorted[0,1], ((II_value_sorted[1,1] + 1) + ( II_value_sorted[1,0]  * A.shape[0])), II_value_sorted[1,0], II_value_sorted[1,1])
