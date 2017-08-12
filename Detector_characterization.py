@@ -44,7 +44,7 @@ for oo in range(0, A.shape[2], 20):
     for k in range(A.shape[3]):
         hist_counter[k,0] = k
         hist_counter[k, 1] = sum(A[aa,bb,oo,k,:])
-        hist_counter[k, 2] = sum(B[aa,bb,oo,:,k])
+        hist_counter[k, 2] = sum(B[aa,bb,oo,k,:])
     plt.subplot(1,2,1)
     plt.ylim(9E4, 1E5)
     plt.plot(hist_counter[:,0], hist_counter[:,1], 'o', markersize=1.5)
