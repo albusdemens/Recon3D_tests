@@ -9,6 +9,31 @@ A = np.load('/u/data/alcer/DFXRM_rec/Rec_test/dataarray_clean.npy')
 
 B = np.zeros([A.shape[0], A.shape[1], A.shape[2], A.shape[3], A.shape[4],])
 
+# Test 1: isolate the diffarction regions and then sum them
+
+
+# Test 2: sum and isolate the diffraction region
+for ii in range(A.shape[2]):
+    Sum_oo = np.zeros([A.shape[3], A.shape[4]])
+    Sum_oo_th = np.zeros([A.shape[3], A.shape[4]])
+    for aa in range(A.shape[3]):
+        for bb in range(A.shape[4]):
+            Sum_oo[aa,bb] += np.sum(A[:,:,ii,aa,bb])
+    # Threshold the Image
+    Sum_oo_th = Sum_oo
+    Sum_oo_th[Sum_oo_th < 1000] = 0
+
+    fig = plt.figure()
+    plt.subplot(1,2,1)
+    plt.imshow(Sum_oo)
+    plt.subplot(1,2,2)
+    plt.imshow(Sum_oo_th)
+    plt.show()
+
+sys.exit()
+
+
+
 mean_proj = np.zeros([A.shape[2], 3])
 
 for ii in range(A.shape[2]):
