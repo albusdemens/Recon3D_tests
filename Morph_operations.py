@@ -25,9 +25,11 @@ for ii in range(A.shape[2]):
     for aa in range(A.shape[0]):
         for bb in range(A.shape[1]):
             IM = np.zeros([A.shape[3], A.shape[4]])
+            IM_raw = np.zeros([A.shape[3], A.shape[4]])
             IM[:,:] = A[aa,bb,ii,:,:]
+            #IM = IM_raw
             # Get rid og hot pixels
-            IM[IM>100] = 0
+            #IM[IM>100] = 0
             # Rebin the considered plot
             IM_reb = np.zeros([A.shape[3]/sz_fr, A.shape[4]/sz_fr])
             IM_reb = rebin(IM, [IM_reb.shape[0],IM_reb.shape[1]])
@@ -59,20 +61,25 @@ for ii in range(A.shape[2]):
             # Subtract the calculated background from the initial image
             IM_clean = IM - IM_reb_3
             IM_clean[IM_clean < 0] = 0
+            IM_clean_bin = np.zeros([IM_clean.shape[0], IM_clean.shape[1]])
+            IM_clean_bin[IM_clean > 20] = 1
 
             fig = plt.figure()
-            plt.subplot(2,2,1)
+            plt.subplot(2,3,1)
             # Raw image
             plt.imshow(IM)
-            plt.subplot(2,2,2)
+            plt.subplot(2,3,2)
             # Binarized image
             plt.imshow(IM_reb)
-            plt.subplot(2,2,3)
+            plt.subplot(2,3,3)
             # Calculated background
             plt.imshow(IM_reb_2)
-            plt.subplot(2,2,4)
+            plt.subplot(2,3,4)
             # Cleaned image
             plt.imshow(IM_clean)
+            plt.subplot(2,3,5)
+            # Cleaned image
+            plt.imshow(IM_clean_bin)
             plt.show()
 
 sys.exit()
