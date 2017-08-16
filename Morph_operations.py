@@ -9,8 +9,73 @@ A = np.load('/u/data/alcer/DFXRM_rec/Rec_test/dataarray_clean.npy')
 
 B = np.zeros([A.shape[0], A.shape[1], A.shape[2], A.shape[3], A.shape[4],])
 
-# Test 1: isolate the diffarction regions and then sum them
+# Size of the frame used to clean the images
+sz_fr = 20
 
+# Function to rebin the values in a matrix and assign to each bin the average
+# intensity
+def rebin(a, shape):
+    sh = shape[0],a.shape[0]//shape[0],shape[1],a.shape[1]//shape[1]
+    return a.reshape(sh).mean(-1).mean(1)
+
+# Test 1: isolate the diffraction regions and then sum them
+# Before that, subtract the image background, calculated usign a frame, where we
+# expect no diffraction signal
+for ii in range(A.shape[2]):
+    for aa in range(A.shape[0]):
+        for bb in range(A.shape[1]):
+            IM = np.zeros([A.shape[3], A.shape[4]])
+            IM[:,:] = A[aa,bb,ii,:,:]
+            # Get rid og hot pixels
+            IM[IM>100] = 0
+            # Rebin the considered plot
+            IM_reb = np.zeros([A.shape[3]/sz_fr, A.shape[4]/sz_fr])
+            IM_reb = rebin(IM, [IM_reb.shape[0],IM_reb.shape[1]])
+            # Calculate the expected background distribution, assuming it to
+            # be linear
+            IM_reb_2 = np.zeros([A.shape[3]/sz_fr, A.shape[4]/sz_fr])
+            IM_reb_3 = np.zeros([A.shape[3], A.shape[4]])
+            IM_reb_2[0,:] = IM_reb[0,:]
+            IM_reb_2[IM_reb.shape[0]-1,:] = IM_reb[IM_reb.shape[0]-1,:]
+            IM_reb_2[:,0] = IM_reb[:,0]
+            IM_reb_2[:,IM_reb.shape[0]-1] = IM_reb[:,IM_reb.shape[0]-1]
+            for jj in range(1,IM_reb.shape[0]-1):
+                for kk in range(1,IM_reb.shape[1]-1):
+                    I_min_x = min(IM_reb[jj,0], IM_reb[jj,IM_reb.shape[1]-1])
+                    I_max_x = max(IM_reb[jj,0], IM_reb[jj,IM_reb.shape[1]-1])
+                    I_min_y = min(IM_reb[0,kk], IM_reb[IM_reb.shape[0]-1, kk])
+                    I_max_y = max(IM_reb[0,kk], IM_reb[IM_reb.shape[0]-1, kk])
+                    I_eval_x = I_min_x + ((I_max_x - I_min_x) / (IM.shape[0] - 2*sz_fr)) * (jj - sz_fr)
+                    I_eval_y = I_min_y + ((I_max_y - I_min_y) / (IM.shape[1] - 2*sz_fr)) * (kk - sz_fr)
+
+                    # For the dataset 1, we notice that the crucial component to
+                    # take into account is how the background varies along Y
+                    IM_reb_2[jj,kk] = np.mean([I_min_x, I_max_x])
+
+            for jj in range(IM_reb.shape[0]):
+                for kk in range(IM_reb.shape[1]):
+                    IM_reb_3[jj*sz_fr:(jj+1)*sz_fr, kk*sz_fr:(kk+1)*sz_fr] = IM_reb_2[jj,kk]
+
+            # Subtract the calculated background from the initial image
+            IM_clean = IM - IM_reb_3
+            IM_clean[IM_clean < 0] = 0
+
+            fig = plt.figure()
+            plt.subplot(2,2,1)
+            # Raw image
+            plt.imshow(IM)
+            plt.subplot(2,2,2)
+            # Binarized image
+            plt.imshow(IM_reb)
+            plt.subplot(2,2,3)
+            # Calculated background
+            plt.imshow(IM_reb_2)
+            plt.subplot(2,2,4)
+            # Cleaned image
+            plt.imshow(IM_clean)
+            plt.show()
+
+sys.exit()
 
 # Test 2: sum and isolate the diffraction region
 for ii in range(A.shape[2]):
