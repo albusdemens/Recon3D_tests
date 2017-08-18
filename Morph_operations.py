@@ -51,14 +51,14 @@ for ii in range(0,A.shape[2],20):
                 for kk in range(1,IM_reb.shape[1]-1):
                     I_min_x = min(IM_reb[jj,0], IM_reb[jj,IM_reb.shape[1]-1])
                     I_max_x = max(IM_reb[jj,0], IM_reb[jj,IM_reb.shape[1]-1])
-                    I_min_y = min(IM_reb[0,kk], IM_reb[IM_reb.shape[0]-1, kk])
-                    I_max_y = max(IM_reb[0,kk], IM_reb[IM_reb.shape[0]-1, kk])
+                    #I_min_y = min(IM_reb[0,kk], IM_reb[IM_reb.shape[0]-1, kk])
+                    #I_max_y = max(IM_reb[0,kk], IM_reb[IM_reb.shape[0]-1, kk])
                     I_eval_x = I_min_x + ((I_max_x - I_min_x) / (IM.shape[0] - 2*sz_fr)) * (jj - sz_fr)
-                    I_eval_y = I_min_y + ((I_max_y - I_min_y) / (IM.shape[1] - 2*sz_fr)) * (kk - sz_fr)
+                    #I_eval_y = I_min_y + ((I_max_y - I_min_y) / (IM.shape[1] - 2*sz_fr)) * (kk - sz_fr)
 
                     # For the dataset 1, we notice that the crucial component to
                     # take into account is how the background varies along Y
-                    IM_reb_2[jj,kk] = np.mean([I_min_x, I_max_x])
+                    IM_reb_2[jj,kk] = I_eval_x
 
             for jj in range(IM_reb.shape[0]):
                 for kk in range(IM_reb.shape[1]):
