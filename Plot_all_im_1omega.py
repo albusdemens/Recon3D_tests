@@ -2,6 +2,7 @@
 # Aim: plot the images collected at a certain projection
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import sys
 import os
@@ -26,16 +27,46 @@ for i in range(Data.shape[0]):
         Data_angle[idx-1, 1] = Data[i,2]
 
 # Plot the various recorded images (one projection)
-fig, axes = plt.subplots(A.shape[0], A.shape[0])
+### Combine all matrices in a big, unique matrix
+#Summed_imgs = np.zeros([(A.shape[3] + 10) * A.shape[0] + 20, (A.shape[4] + 10) * A.shape[1] + 20])
+#for i in range(11):#A.shape[0]):
+#    for j in range(11):#A.shape[1]):
+#        print i, j
+#        Summed_imgs[(A.shape[3] * i) + (10 * (i+1)) : (A.shape[3] * (i + 1) + (10 * (i+1))),
+#                    (A.shape[4] * j) + (10 * (j+1)) : (A.shape[4] * (j + 1) + (10 * (j+1)))] = A[i,j,omega,:,:]
+
+#fig = plt.figure()
+#plt.imshow(Summed_imgs)
+#plt.show()
+
+### A more traditional approach
+
+fig, axes = plt.subplots(A.shape[0], A.shape[0], figsize=(15,15))
+
 for i in range(A.shape[0]*A.shape[0]):
     a1 = fig.add_subplot(A.shape[0],A.shape[0],i+1)
-    plt.setp(a1.get_xticklabels(), visible=False)
-    plt.setp(a1.get_yticklabels(), visible=False)
     aa = Data_angle[i,0]
     bb = Data_angle[i,1]
     plt.imshow(A[int(aa),int(bb),omega,:,:])
 
+    #labels = [item.get_text() for item in a1.get_xticklabels()]
+    #empty_string_labels = ['']*len(labels)
+    #a1.set_xticklabels(empty_string_labels)
+
+    #labels = [item.get_text() for item in a1.get_yticklabels()]
+    #empty_string_labels = ['']*len(labels)
+    #a1.set_yticklabels(empty_string_labels)
+
+    #a1.set(xticks=[], yticks=[])
+    a1.axis('off')
+
+plt.axis('off')
+fig.text(0.5, 0.04, 'Gamma', ha='center')
+fig.text(0.04, 0.5, 'Mu', va='center', rotation='vertical')
+
 plt.show()
+
+sys.exit()
 
 # Plot the various recorded images (all projections)
 fig, axes = plt.subplots(A.shape[0], A.shape[0])
