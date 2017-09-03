@@ -166,6 +166,8 @@ class makematrix():
 			bigarray_clean_2 = np.zeros((lena, lenb, leno, int(imsiz[1]), int(imsiz[0])), dtype=np.uint16)
 			IM_min_avg = np.zeros([int(imsiz[1]), int(imsiz[0]), leno])
 			mean_proj = np.zeros([leno,2])
+			mean_proj_2 = np.zeros([leno,2])
+
 			# For each projection, find the two images with the lowest integrated
 			# intensity. Images are then cleaned by subtracting the average of
 			# the two. Then divide the result by the mean value for a certain
@@ -216,6 +218,47 @@ class makematrix():
 			# Set negative values to zero; take care of hot pixels
 			bigarray_clean[bigarray_clean < 0] = 0
 			bigarray_clean[bigarray_clean > 6E04] = 0
+
+
+
+			for k in range(leno):
+				mean_proj[k,0] = k
+				sum_img = np.zeros([bigarray.shape[3], bigarray.shape[4]])
+				for ii in range(bigarray.shape[3]):
+					for jj in range(bigarray.shape[4]):
+						sum_img[ii,jj] = np.sum(bigarray_clean[:,:,k,ii,jj])
+				mean_proj[k,1] = np.mean(sum_img)
+			mean_mean = np.mean(mean_proj[:,1])
+			print mean_mean
+
+			# Normalize by the mean
+			for k in range(leno):
+				bigarray_clean_2[:,:,k,:,:] = bigarray_clean[:,:,k,:,:] / mean_proj[k,1] * mean_mean
+			print "Raw data cleaned."
+
+			for k in range(leno):
+				mean_proj_2[k,0] = k
+				sum_img = np.zeros([bigarray.shape[3], bigarray.shape[4]])
+				for ii in range(bigarray.shape[3]):
+					for jj in range(bigarray.shape[4]):
+						sum_img[ii,jj] = np.sum(bigarray_clean_2[:,:,k,ii,jj])
+				mean_proj_2[k,1] = np.mean(sum_img)
+			mean_mean_2 = np.mean(mean_proj_2[:,1])
+			print mean_mean
+
+			### Plot mean intensity before and after normalization
+			#fig = plt.figure()
+			#a1 = plt.scatter(mean_proj[:,0], mean_proj[:,1])
+			#a2 = plt.scatter(mean_proj_2[:,0], mean_proj_2[:,1])
+			#plt.title('Mean intensity per projection before and after normalization')
+			#plt.xlabel('Projection number')
+			#plt.ylabel('Mean intensity')
+			#plt.legend((a1, a2), ('Median intensity before normalization', 'Median intensity after normalization'),
+			          #scatterpoints=1,
+			          #loc='lower left',
+			          #fontsize=12)
+			#plt.show()
+			#sys.exit()
 
 			for k in range(leno):
 				mean_proj[k,0] = k
