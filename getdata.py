@@ -324,6 +324,21 @@ class makematrix():
 						IM_clean = IM - IM_reb_3
 						IM_clean[IM_clean < 0] = 0
 
+						#fig = plt.figure()
+						#plt.subplot(2,2,1)
+						#plt.imshow(IM)
+						#plt.title('Raw image')
+						#plt.subplot(2,2,2)
+						#plt.imshow(IM_reb)
+						#plt.title('Binned image')
+						#plt.subplot(2,2,3)
+						#plt.imshow(IM_reb_3)
+						#plt.title('Calculated background')
+						#plt.subplot(2,2,4)
+						#plt.imshow(IM_clean)
+						#plt.title('Cleaned image')
+						#plt.show()
+
 						# Recognize the diffraction signal and set all the
 						# outside pixels to zero. We do so by making a mask
 						IM_clean_bin = np.zeros([IM.shape[0], IM.shape[1]])
@@ -345,6 +360,22 @@ class makematrix():
 								Mask[label_image == id] = 1
 
 						IM_clean_masked = IM_clean * Mask
+
+						### Plot steps morphological operations
+						# fig = plt.figure()
+						# plt.subplot(2,2,1)
+						# plt.imshow(IM_clean)
+						# plt.title('Initial image')
+						# plt.subplot(2,2,2)
+						# plt.imshow(Dilated_c)
+						# plt.title('Image after morphological operations')
+						# plt.subplot(2,2,3)
+						# plt.imshow(Mask)
+						# plt.title('Mask')
+						# plt.subplot(2,2,4)
+						#plt.imshow(IM_clean_masked)
+						#plt.title('Masked image')
+						#plt.show()
 
 						bigarray_clean_3[aa,bb,ii,:,:] = IM_clean_masked[:,:]
 
